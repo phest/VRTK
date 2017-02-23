@@ -3,6 +3,7 @@ namespace VRTK
 {
     using UnityEngine;
     using System;
+    using ControllerHands = SDK_BaseController.ControllerHand;
 
     /// <summary>
     /// Event Payload
@@ -79,6 +80,9 @@ namespace VRTK
             ButtonTwoPress,
             StartMenuPress
         }
+
+        [Tooltip("The hand of the controller to provide the helper methods for. If this is set to None the game object this script is attached to will be used.")]
+        public ControllerHands trackedHand = ControllerHands.None;
 
         [Header("Action Alias Buttons")]
 
@@ -829,7 +833,7 @@ namespace VRTK
         [Obsolete("`VRTK_ControllerEvents.GetVelocity()` has been replaced with `VRTK_DeviceFinder.GetControllerVelocity(givenController)`. This method will be removed in a future version of VRTK.")]
         public Vector3 GetVelocity()
         {
-            return VRTK_DeviceFinder.GetControllerVelocity(gameObject);
+            return VRTK_DeviceFinder.GetControllerVelocity(GetTrackedHand());
         }
 
         /// <summary>
@@ -839,7 +843,7 @@ namespace VRTK
         [Obsolete("`VRTK_ControllerEvents.GetAngularVelocity()` has been replaced with `VRTK_DeviceFinder.GetControllerAngularVelocity(givenController)`. This method will be removed in a future version of VRTK.")]
         public Vector3 GetAngularVelocity()
         {
-            return VRTK_DeviceFinder.GetControllerAngularVelocity(gameObject);
+            return VRTK_DeviceFinder.GetControllerAngularVelocity(GetTrackedHand());
         }
 
         /// <summary>
@@ -972,7 +976,7 @@ namespace VRTK
 
         protected virtual void OnEnable()
         {
-            var actualController = VRTK_DeviceFinder.GetActualController(gameObject);
+            var actualController = VRTK_DeviceFinder.GetActualController(GetTrackedHand());
             if (actualController)
             {
                 var controllerTracker = actualController.GetComponent<VRTK_TrackedController>();
@@ -988,7 +992,7 @@ namespace VRTK
         protected virtual void OnDisable()
         {
             Invoke("DisableEvents", 0f);
-            var actualController = VRTK_DeviceFinder.GetActualController(gameObject);
+            var actualController = VRTK_DeviceFinder.GetActualController(GetTrackedHand());
             if (actualController)
             {
                 var controllerTracker = actualController.GetComponent<VRTK_TrackedController>();
@@ -1002,7 +1006,7 @@ namespace VRTK
 
         protected virtual void Update()
         {
-            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(gameObject);
+            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(GetTrackedHand());
 
             //Only continue if the controller index has been set to a sensible number
             if (controllerIndex >= uint.MaxValue)
@@ -1621,9 +1625,21 @@ namespace VRTK
             }
         }
 
+        protected virtual GameObject GetTrackedHand()
+        {
+            switch(trackedHand)
+            {
+                case ControllerHands.Left:
+                    return VRTK_DeviceFinder.GetControllerLeftHand();
+                case ControllerHands.Right:
+                    return VRTK_DeviceFinder.GetControllerRightHand();
+            }
+            return gameObject;
+        }
+
         private ControllerInteractionEventArgs SetButtonEvent(ref bool buttonBool, bool value, float buttonPressure)
         {
-            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(gameObject);
+            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(GetTrackedHand());
             buttonBool = value;
             ControllerInteractionEventArgs e;
             e.controllerIndex = controllerIndex;
@@ -1847,7 +1863,7 @@ namespace VRTK
             gripAxisChanged = false;
             touchpadAxisChanged = false;
 
-            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(gameObject);
+            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(GetTrackedHand());
 
             if (controllerIndex < uint.MaxValue)
             {

@@ -1650,6 +1650,7 @@ The script also has a public boolean pressed state for the buttons to allow the 
 
 ### Inspector Parameters
 
+ * **Tracked Hand:** The hand of the controller to provide the helper methods for. If this is set to None the game object this script is attached to will be used.
  * **Grab Toggle Button:** The button to use for the action of grabbing game objects.
  * **Use Toggle Button:** The button to use for the action of using game objects.
  * **Menu Toggle Button:** The button to use for the action of bringing up an in-game menu.
