@@ -6,44 +6,37 @@ namespace VRTK
     [RequireComponent(typeof(RadialMenu))]
     public class RadialMenuController : MonoBehaviour
     {
+        [Header("Custom Settings")]
+
+        [Tooltip("The controller to listen for the events on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
         public VRTK_ControllerEvents events;
+        [Tooltip("The controller to perform actions on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
+        public VRTK_ControllerActions controllerActions;
 
         protected RadialMenu menu;
         private float currentAngle; //Keep track of angle for when we click
         private bool touchpadTouched;
 
-        protected virtual void Awake()
+        protected virtual void OnEnable()
         {
             menu = GetComponent<RadialMenu>();
 
-            Initialize();
-        }
-
-        protected virtual void Initialize()
-        {
+            events = (events ?? GetComponentInParent<VRTK_ControllerEvents>());
             if (events == null)
             {
-                events = GetComponentInParent<VRTK_ControllerEvents>();
-            }
-        }
-
-        protected virtual void OnEnable()
-        {
-            if (events == null)
-            {
-                Debug.LogError("The radial menu must be a child of the controller or be set in the inspector!");
+                Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_ControllerEvents", "RadialMenuController", "events" }));
                 return;
             }
-            else
-            {
-                events.TouchpadPressed += new ControllerInteractionEventHandler(DoTouchpadClicked);
-                events.TouchpadReleased += new ControllerInteractionEventHandler(DoTouchpadUnclicked);
-                events.TouchpadTouchStart += new ControllerInteractionEventHandler(DoTouchpadTouched);
-                events.TouchpadTouchEnd += new ControllerInteractionEventHandler(DoTouchpadUntouched);
-                events.TouchpadAxisChanged += new ControllerInteractionEventHandler(DoTouchpadAxisChanged);
 
-                menu.FireHapticPulse += new HapticPulseEventHandler(AttemptHapticPulse);
-            }
+            controllerActions = (controllerActions ?? GetComponentInParent<VRTK_ControllerActions>());
+
+            events.TouchpadPressed += new ControllerInteractionEventHandler(DoTouchpadClicked);
+            events.TouchpadReleased += new ControllerInteractionEventHandler(DoTouchpadUnclicked);
+            events.TouchpadTouchStart += new ControllerInteractionEventHandler(DoTouchpadTouched);
+            events.TouchpadTouchEnd += new ControllerInteractionEventHandler(DoTouchpadUntouched);
+            events.TouchpadAxisChanged += new ControllerInteractionEventHandler(DoTouchpadAxisChanged);
+
+            menu.FireHapticPulse += new HapticPulseEventHandler(AttemptHapticPulse);
         }
 
         protected virtual void OnDisable()
@@ -55,6 +48,10 @@ namespace VRTK
             events.TouchpadAxisChanged -= new ControllerInteractionEventHandler(DoTouchpadAxisChanged);
 
             menu.FireHapticPulse -= new HapticPulseEventHandler(AttemptHapticPulse);
+
+            events = null;
+            controllerActions = null;
+            menu = null;
         }
 
         protected void DoClickButton(object sender = null) // The optional argument reduces the need for middleman functions in subclasses whose events likely pass object sender
@@ -88,7 +85,6 @@ namespace VRTK
 
         protected virtual void AttemptHapticPulse(float strength)
         {
-            var controllerActions = GetComponentInParent<VRTK_ControllerActions>();
             if (controllerActions)
             {
                 controllerActions.TriggerHapticPulse(strength);

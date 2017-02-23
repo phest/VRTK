@@ -57,7 +57,7 @@ namespace VRTK
         [Header("Control Settings")]
 
         [Tooltip("The controller to read the controller events from. If this is blank then it will attempt to get a controller events script from the same GameObject.")]
-        public VRTK_ControllerEvents controller;
+        public VRTK_ControllerEvents controllerEvents;
         [Tooltip("The direction that will be moved in is the direction of this device.")]
         public DirectionDevices deviceForDirection = DirectionDevices.Headset;
         [Tooltip("If this is checked then whenever the axis on the attached controller is being changed, all other object control scripts of the same type on other controllers will be disabled.")]
@@ -77,7 +77,6 @@ namespace VRTK
         /// </summary>
         public event ObjectControlEventHandler YAxisChanged;
 
-        protected VRTK_ControllerEvents controllerEvents;
         protected VRTK_BodyPhysics bodyPhysics;
         protected VRTK_ObjectControl otherObjectControl;
         protected GameObject controlledGameObject;
@@ -116,10 +115,10 @@ namespace VRTK
         {
             currentAxis = Vector2.zero;
             storedAxis = Vector2.zero;
-            controllerEvents = (controller ?? GetComponent<VRTK_ControllerEvents>());
+            controllerEvents = (controllerEvents ?? GetComponentInParent<VRTK_ControllerEvents>());
             if (!controllerEvents)
             {
-                Debug.LogError("A `VRTK_ControllerEvents` script is required for the `VRTK_ObjectControl` script to work. Either the `controller` parameter is not set or no `VRTK_ControllerEvents` is attached to this GameObject.");
+                Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_ControllerEvents", "VRTK_ObjectControl", "controller" }));
                 return;
             }
             SetControlledObject();

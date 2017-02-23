@@ -193,6 +193,7 @@ There are a number of parameters that can be set on the Prefab which are provide
  * **Button One:** The transform for the position of button one on the controller.
  * **Button Two:** The transform for the position of button two on the controller.
  * **Start Menu:** The transform for the position of the start menu on the controller.
+ * **Controller Actions:** The controller to perform actions on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
 
 ### Class Methods
 
@@ -516,6 +517,7 @@ To show / hide a UI panel, you must first pick up the VRTK_InteractableObject an
  * **Bottom Panel Menu Item Controller:** The bottom PanelMenuItemController, which is triggered by pressing down on the controller touchpad.
  * **Left Panel Menu Item Controller:** The left PanelMenuItemController, which is triggered by pressing left on the controller touchpad.
  * **Right Panel Menu Item Controller:** The right PanelMenuItemController, which is triggered by pressing right on the controller touchpad.
+ * **Controller Events:** The controller to listen for the events on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
 
 ### Example
 
@@ -1252,6 +1254,10 @@ Adding the `VRTK_DashTeleport_UnityEvents` component to `VRTK_DashTeleport` obje
 
 The purpose of the Teleport Disable On Headset Collision script is to detect when the headset is colliding with a valid object and prevent teleportation from working. This is to ensure that if a user is clipping their head into a wall then they cannot teleport to an area beyond the wall.
 
+### Inspector Parameters
+
+ * **Teleporter:** The Teleporter to utilise. If the script is being applied on to the same GameObject as the teleport script then this parameter can be left blank as it will be auto populated at runtime.
+
 ---
 
 ## Teleport Disable On Controller Obscured (VRTK_TeleportDisableOnControllerObscured)
@@ -1259,6 +1265,10 @@ The purpose of the Teleport Disable On Headset Collision script is to detect whe
 ### Overview
 
 The purpose of the Teleport Disable On Controller Obscured script is to detect when the headset does not have a line of sight to the controllers and prevent teleportation from working. This is to ensure that if a user is clipping their controllers through a wall then they cannot teleport to an area beyond the wall.
+
+### Inspector Parameters
+
+ * **Teleporter:** The Teleporter to utilise. If the script is being applied on to the same GameObject as the teleport script then this parameter can be left blank as it will be auto populated at runtime.
 
 ---
 
@@ -1272,7 +1282,7 @@ As this is an abstract class, it cannot be applied directly to a game object and
 
 ### Inspector Parameters
 
- * **Controller:** The controller to read the controller events from. If this is blank then it will attempt to get a controller events script from the same GameObject.
+ * **Controller Events:** The controller to read the controller events from. If this is blank then it will attempt to get a controller events script from the same GameObject.
  * **Device For Direction:** The direction that will be moved in is the direction of this device.
  * **Disable Other Controls On Active:** If this is checked then whenever the axis on the attached controller is being changed, all other object control scripts of the same type on other controllers will be disabled.
  * **Affect On Falling:** If a `VRTK_BodyPhysics` script is present and this is checked, then the object control will affect the play area whilst it is falling.
@@ -1381,6 +1391,7 @@ Move In Place allows the user to move the play area by calculating the y-movemen
  * **Direction Method:** How the user's movement direction will be determined.  The Gaze method tends to lead to the least motion sickness.  Smart decoupling is still a Work In Progress.
  * **Smart Decouple Threshold:** The degree threshold that all tracked objects (controllers, headset) must be within to change direction when using the Smart Decoupling Direction Method.
  * **Sensitivity:** The maximum amount of movement required to register in the virtual world.  Decreasing this will increase acceleration, and vice versa.
+ * **Body Physics:** An optional Body Physics to utilise. If the script is being applied on to the same GameObject as the body physics script then this parameter can be left blank as it will be auto populated at runtime.
 
 ### Class Variables
 
@@ -1444,6 +1455,8 @@ The Player Climb allows player movement based on grabbing of `VRTK_InteractableO
 ### Inspector Parameters
 
  * **Use Player Scale:** Will scale movement up and down based on the player transform's scale.
+ * **Teleporter:** The Teleporter to utilise. If the script is being applied on to the same GameObject as the teleport script then this parameter can be left blank as it will be auto populated at runtime.
+ * **Body Physics:** The Body Physics to utilise. If the script is being applied on to the same GameObject as the body physics script then this parameter can be left blank as it will be auto populated at runtime.
 
 ### Class Events
 
@@ -2632,6 +2645,8 @@ A custom collider can be provided by the Custom Rigidbody Object parameter.
 
 ### Inspector Parameters
 
+ * **Controller Events:** The controller to listen for the events on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
+ * **Controller Actions:** The controller to perform actions on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
  * **Custom Rigidbody Object:** If a custom rigidbody and collider for the rigidbody are required, then a gameobject containing a rigidbody and collider can be passed into this parameter. If this is empty then the rigidbody and collider will be auto generated at runtime to match the SDK default controller.
 
 ### Class Events
@@ -2768,10 +2783,13 @@ The interactable objects require a collider to activate the trigger and a rigidb
 
 ### Inspector Parameters
 
- * **Controller Attach Point:** The rigidbody point on the controller model to snap the grabbed object to. If blank it will be set to the SDK default.
  * **Grab Precognition:** An amount of time between when the grab button is pressed to when the controller is touching something to grab it. For example, if an object is falling at a fast rate, then it is very hard to press the grab button in time to catch the object due to human reaction times. A higher number here will mean the grab button can be pressed before the controller touches the object and when the collision takes place, if the grab button is still being held down then the grab action will be successful.
  * **Throw Multiplier:** An amount to multiply the velocity of any objects being thrown. This can be useful when scaling up the play area to simulate being able to throw items further.
  * **Create Rigid Body When Not Touching:** If this is checked and the controller is not touching an Interactable Object when the grab button is pressed then a rigid body is added to the controller to allow the controller to push other rigid body objects around.
+ * **Controller Events:** The controller to listen for the events on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
+ * **Controller Actions:** The controller to perform actions on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
+ * **Interact Touch:** The Interact Touch to listen for touches on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
+ * **Controller Attach Point:** The rigidbody point on the controller model to snap the grabbed object to. If blank it will be set to the SDK default.
 
 ### Class Events
 
@@ -2848,6 +2866,13 @@ The Controller object also requires the `VRTK_InteractTouch` script to be attach
 An object can be used if the Controller touches a game object which contains the `VRTK_InteractableObject` script and has the flag `isUsable` set to `true`.
 
 If a valid interactable object is usable then pressing the set `Use` button on the Controller (default is `Trigger`) will call the `StartUsing` method on the touched interactable object.
+
+### Inspector Parameters
+
+ * **Controller Events:** The controller to listen for the events on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
+ * **Controller Actions:** The controller to perform actions on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
+ * **Interact Touch:** The Interact Touch to listen for touches on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
+ * **Interact Grab:** An optional Interact Grab to listen for grabs on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
 
 ### Class Events
 
@@ -3038,6 +3063,8 @@ It is possible to automatically grab an Interactable Object to a specific contro
  * **Object Is Prefab:** If the `Object To Grab` is a prefab then this needs to be checked, if the `Object To Grab` already exists in the scene then this needs to be unchecked.
  * **Clone Grabbed Object:** If this is checked then the Object To Grab will be cloned into a new object and attached to the controller leaving the existing object in the scene. This is required if the same object is to be grabbed to both controllers as a single object cannot be grabbed by different controllers at the same time. It is also required to clone a grabbed object if it is a prefab as it needs to exist within the scene to be grabbed.
  * **Always Clone On Enable:** If `Clone Grabbed Object` is checked and this is checked, then whenever this script is disabled and re-enabled, it will always create a new clone of the object to grab. If this is false then the original cloned object will attempt to be grabbed again. If the original cloned object no longer exists then a new clone will be created.
+ * **Interact Touch:** The Interact Touch to listen for touches on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
+ * **Interact Grab:** An optional Interact Grab to listen for grabs on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.
 
 ### Class Methods
 
@@ -4365,6 +4392,7 @@ To allow for peeking over a ledge and not falling, a fall restiction can happen 
  * **Gravity Fall Y Threshold:** When the `y` distance between the floor and the headset exceeds this distance and `Enable Body Collisions` is true then the rigidbody gravity will be used instead of teleport to drop to nearest floor.
  * **Blink Y Threshold:** The `y` distance between the floor and the headset that must change before a fade transition is initiated. If the new user location is at a higher distance than the threshold then the headset blink transition will activate on teleport. If the new user location is within the threshold then no blink transition will happen, which is useful for walking up slopes, meshes and terrains to prevent constant blinking.
  * **Floor Height Tolerance:** The amount the `y` position needs to change by between the current floor `y` position and the previous floor `y` position before a change in floor height is considered to have occurred. A higher value here will mean that a `Drop To Floor` will be less likely to happen if the `y` of the floor beneath the user hasn't changed as much as the given threshold.
+ * **Teleporter:** An optional Teleporter to utilise. If the script is being applied on to the same GameObject as the teleport script then this parameter can be left blank as it will be auto populated at runtime.
 
 ### Class Variables
 
@@ -5478,6 +5506,18 @@ The PlayAreaTransform method is used to retrieve the transform for the play area
 The Shared Methods script is a collection of reusable static methods that are used across a range of different scripts.
 
 ### Class Methods
+
+#### GetCommonString/2
+
+  > `public static string GetCommonString(string stringKey, string[] parameters)`
+
+  * Parameters
+   * `string stringKey` - The key of the string within `commonStrings` dictionary to return.
+   * `string[] parameters` - An array of parameters to pass if the string can substitute certain sections.
+  * Returns
+   * `string` - The formatted common string.
+
+The GetCommonString method is used to return a common string.
 
 #### GetBounds/3
 

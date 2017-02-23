@@ -26,17 +26,27 @@ namespace VRTK
     ///
     /// `VRTK/Examples/014_Controller_SnappingObjectsOnGrab` demonstrates the different mechanisms for snapping a grabbed object to the controller.
     /// </example>
-    [RequireComponent(typeof(VRTK_InteractTouch)), RequireComponent(typeof(VRTK_ControllerEvents))]
     public class VRTK_InteractGrab : MonoBehaviour
     {
-        [Tooltip("The rigidbody point on the controller model to snap the grabbed object to. If blank it will be set to the SDK default.")]
-        public Rigidbody controllerAttachPoint = null;
+        [Header("Grab Settings")]
+
         [Tooltip("An amount of time between when the grab button is pressed to when the controller is touching something to grab it. For example, if an object is falling at a fast rate, then it is very hard to press the grab button in time to catch the object due to human reaction times. A higher number here will mean the grab button can be pressed before the controller touches the object and when the collision takes place, if the grab button is still being held down then the grab action will be successful.")]
         public float grabPrecognition = 0f;
         [Tooltip("An amount to multiply the velocity of any objects being thrown. This can be useful when scaling up the play area to simulate being able to throw items further.")]
         public float throwMultiplier = 1f;
         [Tooltip("If this is checked and the controller is not touching an Interactable Object when the grab button is pressed then a rigid body is added to the controller to allow the controller to push other rigid body objects around.")]
         public bool createRigidBodyWhenNotTouching = false;
+
+        [Header("Custom Settings")]
+
+        [Tooltip("The controller to listen for the events on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
+        public VRTK_ControllerEvents controllerEvents;
+        [Tooltip("The controller to perform actions on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
+        public VRTK_ControllerActions controllerActions;
+        [Tooltip("The Interact Touch to listen for touches on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
+        public VRTK_InteractTouch interactTouch;
+        [Tooltip("The rigidbody point on the controller model to snap the grabbed object to. If blank it will be set to the SDK default.")]
+        public Rigidbody controllerAttachPoint = null;
 
         /// <summary>
         /// Emitted when a valid object is grabbed.
@@ -49,9 +59,7 @@ namespace VRTK
 
         private GameObject grabbedObject = null;
         private bool influencingGrabbedObject = false;
-        private VRTK_InteractTouch interactTouch;
-        private VRTK_ControllerActions controllerActions;
-        private VRTK_ControllerEvents controllerEvents;
+
         private int grabEnabledState = 0;
         private float grabPrecognitionTimer = 0f;
         private GameObject undroppableGrabbedObject;
@@ -98,15 +106,29 @@ namespace VRTK
             return grabbedObject;
         }
 
-        protected virtual void Awake()
-        {
-            interactTouch = GetComponent<VRTK_InteractTouch>();
-            controllerActions = GetComponent<VRTK_ControllerActions>();
-            controllerEvents = GetComponent<VRTK_ControllerEvents>();
-        }
-
         protected virtual void OnEnable()
         {
+            controllerEvents = (controllerEvents ?? GetComponent<VRTK_ControllerEvents>());
+            if (!controllerEvents)
+            {
+                Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_ControllerEvents", "VRTK_InteractGrab", "controllerEvents" }));
+                return;
+            }
+
+            controllerActions = (controllerActions ?? GetComponent<VRTK_ControllerActions>());
+            if (!controllerActions)
+            {
+                Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_ControllerActions", "VRTK_InteractGrab", "controllerActions" }));
+                return;
+            }
+
+            interactTouch = (interactTouch ?? GetComponent<VRTK_InteractTouch>());
+            if (!interactTouch)
+            {
+                Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_InteractTouch", "VRTK_InteractGrab", "interactTouch" }));
+                return;
+            }
+
             RegrabUndroppableObject();
 
             controllerEvents.AliasGrabOn += new ControllerInteractionEventHandler(DoGrabObject);
@@ -121,6 +143,10 @@ namespace VRTK
             ForceRelease();
             controllerEvents.AliasGrabOn -= new ControllerInteractionEventHandler(DoGrabObject);
             controllerEvents.AliasGrabOff -= new ControllerInteractionEventHandler(DoReleaseObject);
+
+            controllerEvents = null;
+            controllerActions = null;
+            interactTouch = null;
         }
 
         protected virtual void Update()
@@ -161,12 +187,12 @@ namespace VRTK
 
         private void SetControllerAttachPoint()
         {
-            var modelController = VRTK_DeviceFinder.GetModelAliasController(gameObject);
+            var modelController = VRTK_DeviceFinder.GetModelAliasController(controllerEvents.gameObject);
             //If no attach point has been specified then just use the tip of the controller
             if (modelController && controllerAttachPoint == null)
             {
                 //attempt to find the attach point on the controller
-                var defaultAttachPoint = modelController.transform.Find(VRTK_SDK_Bridge.GetControllerElementPath(SDK_BaseController.ControllerElements.AttachPoint, VRTK_DeviceFinder.GetControllerHand(gameObject)));
+                var defaultAttachPoint = modelController.transform.Find(VRTK_SDK_Bridge.GetControllerElementPath(SDK_BaseController.ControllerElements.AttachPoint, VRTK_DeviceFinder.GetControllerHand(controllerEvents.gameObject)));
                 if (defaultAttachPoint != null)
                 {
                     controllerAttachPoint = defaultAttachPoint.GetComponent<Rigidbody>();
@@ -239,9 +265,9 @@ namespace VRTK
 
         private void InitPrimaryGrab(VRTK_InteractableObject currentGrabbedObject)
         {
-            var grabbingObject = gameObject;
+            var grabbingObject = controllerEvents.gameObject;
 
-            if (!currentGrabbedObject.IsValidInteractableController(gameObject, currentGrabbedObject.allowedGrabControllers))
+            if (!currentGrabbedObject.IsValidInteractableController(grabbingObject, currentGrabbedObject.allowedGrabControllers))
             {
                 grabbedObject = null;
                 if (currentGrabbedObject.IsGrabbed(grabbingObject))
@@ -261,9 +287,9 @@ namespace VRTK
 
         private void InitSecondaryGrab(VRTK_InteractableObject currentGrabbedObject)
         {
-            var grabbingObject = gameObject;
+            var grabbingObject = controllerEvents.gameObject;
 
-            if (!currentGrabbedObject.IsValidInteractableController(gameObject, currentGrabbedObject.allowedGrabControllers))
+            if (!currentGrabbedObject.IsValidInteractableController(grabbingObject, currentGrabbedObject.allowedGrabControllers))
             {
                 grabbedObject = null;
                 influencingGrabbedObject = false;

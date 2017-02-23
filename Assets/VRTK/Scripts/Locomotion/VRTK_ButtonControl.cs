@@ -68,7 +68,7 @@ namespace VRTK
 
         protected override VRTK_ObjectControl GetOtherControl()
         {
-            GameObject foundController = (VRTK_DeviceFinder.IsControllerLeftHand(gameObject) ? VRTK_DeviceFinder.GetControllerRightHand(false) : VRTK_DeviceFinder.GetControllerLeftHand(false));
+            GameObject foundController = (VRTK_DeviceFinder.IsControllerLeftHand(controllerEvents.gameObject) ? VRTK_DeviceFinder.GetControllerRightHand(false) : VRTK_DeviceFinder.GetControllerLeftHand(false));
             if (foundController)
             {
                 return foundController.GetComponent<VRTK_ButtonControl>();

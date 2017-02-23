@@ -9,18 +9,23 @@ namespace VRTK
     /// </summary>
     public class VRTK_TeleportDisableOnHeadsetCollision : MonoBehaviour
     {
-        private VRTK_BasicTeleport basicTeleport;
+        [Header("Custom Settings")]
+
+        [Tooltip("The Teleporter to utilise. If the script is being applied on to the same GameObject as the teleport script then this parameter can be left blank as it will be auto populated at runtime.")]
+        public VRTK_BasicTeleport teleporter;
+
         private VRTK_HeadsetCollision headsetCollision;
+        private Coroutine enableScript;
 
         protected virtual void OnEnable()
         {
-            basicTeleport = GetComponent<VRTK_BasicTeleport>();
-            StartCoroutine(EnableAtEndOfFrame());
+            teleporter = (teleporter ?? GetComponent<VRTK_BasicTeleport>());
+            enableScript = StartCoroutine(EnableAtEndOfFrame());
         }
 
         protected virtual void OnDisable()
         {
-            if (basicTeleport == null)
+            if (teleporter == null)
             {
                 return;
             }
@@ -30,11 +35,17 @@ namespace VRTK
                 headsetCollision.HeadsetCollisionDetect -= new HeadsetCollisionEventHandler(DisableTeleport);
                 headsetCollision.HeadsetCollisionEnded -= new HeadsetCollisionEventHandler(EnableTeleport);
             }
+
+            if (enableScript != null)
+            {
+                StopCoroutine(enableScript);
+            }
+            teleporter = null;
         }
 
         private IEnumerator EnableAtEndOfFrame()
         {
-            if (basicTeleport == null)
+            if (teleporter == null)
             {
                 yield break;
             }
@@ -50,12 +61,12 @@ namespace VRTK
 
         private void DisableTeleport(object sender, HeadsetCollisionEventArgs e)
         {
-            basicTeleport.ToggleTeleportEnabled(false);
+            teleporter.ToggleTeleportEnabled(false);
         }
 
         private void EnableTeleport(object sender, HeadsetCollisionEventArgs e)
         {
-            basicTeleport.ToggleTeleportEnabled(true);
+            teleporter.ToggleTeleportEnabled(true);
         }
     }
 }

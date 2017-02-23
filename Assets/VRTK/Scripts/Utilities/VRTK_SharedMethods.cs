@@ -3,12 +3,34 @@ namespace VRTK
 {
     using UnityEngine;
     using System.Reflection;
+    using System.Collections.Generic;
 
     /// <summary>
     /// The Shared Methods script is a collection of reusable static methods that are used across a range of different scripts.
     /// </summary>
     public class VRTK_SharedMethods : MonoBehaviour
     {
+        public static Dictionary<string, string> commonStrings = new Dictionary<string, string>()
+        {
+            {"REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", "A `{0}` script is required for the `{1}` script to work. Either the `{2}` parameter is not set or no `{0}` is attached to this GameObject."}
+        };
+
+        /// <summary>
+        /// The GetCommonString method is used to return a common string.
+        /// </summary>
+        /// <param name="stringKey">The key of the string within `commonStrings` dictionary to return.</param>
+        /// <param name="parameters">An array of parameters to pass if the string can substitute certain sections.</param>
+        /// <returns>The formatted common string.</returns>
+        public static string GetCommonString(string stringKey, string[] parameters)
+        {
+            if (commonStrings.ContainsKey(stringKey))
+            {
+                return string.Format(commonStrings[stringKey], parameters);
+            }
+
+            return "";
+        }
+
         /// <summary>
         /// The GetBounds methods returns the bounds of the transform including all children in world space.
         /// </summary>
@@ -129,7 +151,7 @@ namespace VRTK
         public static Component CloneComponent(Component source, GameObject destination, bool copyProperties = false)
         {
             Component tmpComponent = destination.gameObject.AddComponent(source.GetType());
-            if(copyProperties)
+            if (copyProperties)
             {
                 foreach (PropertyInfo p in source.GetType().GetProperties())
                 {

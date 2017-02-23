@@ -20,9 +20,21 @@ namespace VRTK
     ///
     /// `VRTK/Examples/008_Controller_UsingAGrabbedObject` shows that objects can be grabbed with one button and used with another (e.g. firing a gun).
     /// </example>
-    [RequireComponent(typeof(VRTK_InteractTouch)), RequireComponent(typeof(VRTK_ControllerEvents))]
     public class VRTK_InteractUse : MonoBehaviour
     {
+        [Header("Custom Settings")]
+
+        [Tooltip("The controller to listen for the events on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
+        public VRTK_ControllerEvents controllerEvents;
+        [Tooltip("The controller to perform actions on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
+        public VRTK_ControllerActions controllerActions;
+        [Tooltip("The Interact Touch to listen for touches on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
+        public VRTK_InteractTouch interactTouch;
+        [Tooltip("An optional Interact Grab to listen for grabs on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
+        public VRTK_InteractGrab interactGrab;
+
+        private GameObject usingObject = null;
+
         /// <summary>
         /// Emitted when a valid object starts being used.
         /// </summary>
@@ -31,11 +43,6 @@ namespace VRTK
         /// Emitted when a valid object stops being used.
         /// </summary>
         public event ObjectInteractEventHandler ControllerUnuseInteractableObject;
-
-        private GameObject usingObject = null;
-        private VRTK_InteractTouch interactTouch;
-        private VRTK_ControllerActions controllerActions;
-        private VRTK_ControllerEvents controllerEvents;
 
         public virtual void OnControllerUseInteractableObject(ObjectInteractEventArgs e)
         {
@@ -84,15 +91,31 @@ namespace VRTK
             }
         }
 
-        protected virtual void Awake()
-        {
-            interactTouch = GetComponent<VRTK_InteractTouch>();
-            controllerActions = GetComponent<VRTK_ControllerActions>();
-            controllerEvents = GetComponent<VRTK_ControllerEvents>();
-        }
-
         protected virtual void OnEnable()
         {
+            controllerEvents = (controllerEvents ?? GetComponent<VRTK_ControllerEvents>());
+            if (!controllerEvents)
+            {
+                Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_ControllerEvents", "VRTK_InteractGrab", "controllerEvents" }));
+                return;
+            }
+
+            controllerActions = (controllerActions ?? GetComponent<VRTK_ControllerActions>());
+            if (!controllerActions)
+            {
+                Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_ControllerActions", "VRTK_InteractGrab", "controllerActions" }));
+                return;
+            }
+
+            interactTouch = (interactTouch ?? GetComponent<VRTK_InteractTouch>());
+            if (!interactTouch)
+            {
+                Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_InteractTouch", "VRTK_InteractGrab", "interactTouch" }));
+                return;
+            }
+
+            interactGrab = (interactGrab ?? GetComponent<VRTK_InteractGrab>());
+
             controllerEvents.AliasUseOn += new ControllerInteractionEventHandler(DoStartUseObject);
             controllerEvents.AliasUseOff += new ControllerInteractionEventHandler(DoStopUseObject);
         }
@@ -102,6 +125,11 @@ namespace VRTK
             ForceStopUsing();
             controllerEvents.AliasUseOn -= new ControllerInteractionEventHandler(DoStartUseObject);
             controllerEvents.AliasUseOff -= new ControllerInteractionEventHandler(DoStopUseObject);
+
+            controllerEvents = null;
+            controllerActions = null;
+            interactTouch = null;
+            interactGrab = null;
         }
 
         private bool IsObjectUsable(GameObject obj)
@@ -175,13 +203,13 @@ namespace VRTK
                 usingObject = touchedObject;
                 var usingObjectScript = usingObject.GetComponent<VRTK_InteractableObject>();
 
-                if (!usingObjectScript.IsValidInteractableController(gameObject, usingObjectScript.allowedUseControllers))
+                if (!usingObjectScript.IsValidInteractableController(controllerEvents.gameObject, usingObjectScript.allowedUseControllers))
                 {
                     usingObject = null;
                     return;
                 }
 
-                usingObjectScript.StartUsing(gameObject);
+                usingObjectScript.StartUsing(controllerEvents.gameObject);
                 ToggleControllerVisibility(false);
                 AttemptHaptics();
                 OnControllerUseInteractableObject(interactTouch.SetControllerInteractEvent(usingObject));
@@ -195,7 +223,7 @@ namespace VRTK
                 var usingObjectCheck = usingObject.GetComponent<VRTK_InteractableObject>();
                 if (usingObjectCheck && completeStop)
                 {
-                    usingObjectCheck.StopUsing(gameObject);
+                    usingObjectCheck.StopUsing(controllerEvents.gameObject);
                 }
                 ToggleControllerVisibility(true);
                 OnControllerUnuseInteractableObject(interactTouch.SetControllerInteractEvent(usingObject));
@@ -205,10 +233,9 @@ namespace VRTK
 
         private GameObject GetFromGrab()
         {
-            var grabScript = GetComponent<VRTK_InteractGrab>();
-            if (grabScript)
+            if (interactGrab)
             {
-                return grabScript.GetGrabbedObject();
+                return interactGrab.GetGrabbedObject();
             }
             return null;
         }

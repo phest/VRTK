@@ -13,7 +13,6 @@ namespace VRTK
     /// <example>
     /// `VRTK/Examples/042_CameraRig_MoveInPlace` demonstrates how the user can move and traverse colliders by either swinging the controllers in a walking fashion or by running on the spot utilisng the head bob for movement.
     /// </example>
-    [RequireComponent(typeof(VRTK_BodyPhysics))]
     public class VRTK_MoveInPlace : MonoBehaviour
     {
         /// <summary>
@@ -68,6 +67,11 @@ namespace VRTK
         [Tooltip("The maximum amount of movement required to register in the virtual world.  Decreasing this will increase acceleration, and vice versa.")]
         public float sensitivity = 0.02f;
 
+        [Header("Custom Settings")]
+
+        [Tooltip("An optional Body Physics to utilise. If the script is being applied on to the same GameObject as the body physics script then this parameter can be left blank as it will be auto populated at runtime.")]
+        public VRTK_BodyPhysics bodyPhysics;
+
         private Transform playArea;
         private GameObject controllerLeftHand;
         private GameObject controllerRightHand;
@@ -77,7 +81,6 @@ namespace VRTK
         private bool previousLeftControllerState;
         private bool previousRightControllerState;
         private VRTK_ControllerEvents.ButtonAlias previousEngageButton;
-        private VRTK_BodyPhysics bodyPhysics;
         private bool currentlyFalling;
 
         // The maximum number of updates we should hold to process movements. The higher the number, the slower the acceleration/deceleration & vice versa.
@@ -147,7 +150,7 @@ namespace VRTK
             active = false;
             previousEngageButton = engageButton;
 
-            bodyPhysics = GetComponent<VRTK_BodyPhysics>();
+            bodyPhysics = (bodyPhysics ?? GetComponent<VRTK_BodyPhysics>());
             controllerLeftHand = VRTK_DeviceFinder.GetControllerLeftHand();
             controllerRightHand = VRTK_DeviceFinder.GetControllerRightHand();
 
@@ -174,7 +177,6 @@ namespace VRTK
 
         protected virtual void OnDisable()
         {
-            bodyPhysics = null;
             SetControllerListeners(controllerLeftHand, leftController, ref leftSubscribed, true);
             SetControllerListeners(controllerRightHand, rightController, ref rightSubscribed, true);
 
@@ -182,6 +184,7 @@ namespace VRTK
             controllerRightHand = null;
             headset = null;
             playArea = null;
+            bodyPhysics = null;
         }
 
         protected virtual void Update()

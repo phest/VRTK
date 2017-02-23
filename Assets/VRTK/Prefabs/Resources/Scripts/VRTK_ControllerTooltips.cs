@@ -60,6 +60,11 @@ namespace VRTK
         [Tooltip("The transform for the position of the start menu on the controller.")]
         public Transform startMenu;
 
+        [Header("Custom Settings")]
+
+        [Tooltip("The controller to perform actions on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
+        public VRTK_ControllerActions controllerActions;
+
         private bool triggerInitialised = false;
         private bool gripInitialised = false;
         private bool touchpadInitialised = false;
@@ -69,7 +74,6 @@ namespace VRTK
         private TooltipButtons[] availableButtons;
         private VRTK_ObjectTooltip[] buttonTooltips;
         private bool[] tooltipStates;
-        private VRTK_ControllerActions controllerActions;
         private VRTK_HeadsetControllerAware headsetControllerAware;
 
         /// <summary>
@@ -144,7 +148,6 @@ namespace VRTK
 
         protected virtual void Awake()
         {
-            controllerActions = GetComponentInParent<VRTK_ControllerActions>();
             triggerInitialised = false;
             gripInitialised = false;
             touchpadInitialised = false;
@@ -170,12 +173,11 @@ namespace VRTK
             {
                 buttonTooltips[i] = transform.FindChild(availableButtons[i].ToString()).GetComponent<VRTK_ObjectTooltip>();
             }
-
-            InitialiseTips();
         }
 
         protected virtual void OnEnable()
         {
+            controllerActions = (controllerActions ?? GetComponentInParent<VRTK_ControllerActions>());
             if (controllerActions)
             {
                 controllerActions.ControllerModelVisible += new ControllerActionsEventHandler(DoControllerVisible);
@@ -189,6 +191,8 @@ namespace VRTK
                 headsetControllerAware.ControllerGlanceExit += new HeadsetControllerAwareEventHandler(DoGlanceExitController);
                 ToggleTips(false);
             }
+
+            InitialiseTips();
         }
 
         protected virtual void OnDisable()
@@ -198,12 +202,14 @@ namespace VRTK
                 controllerActions.ControllerModelVisible -= new ControllerActionsEventHandler(DoControllerVisible);
                 controllerActions.ControllerModelInvisible -= new ControllerActionsEventHandler(DoControllerInvisible);
             }
+            controllerActions = null;
 
             if (headsetControllerAware)
             {
                 headsetControllerAware.ControllerGlanceEnter -= new HeadsetControllerAwareEventHandler(DoGlanceEnterController);
                 headsetControllerAware.ControllerGlanceExit -= new HeadsetControllerAwareEventHandler(DoGlanceExitController);
             }
+            headsetControllerAware = null;
         }
 
         protected virtual void Update()

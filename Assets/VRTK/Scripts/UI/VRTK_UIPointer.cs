@@ -329,12 +329,15 @@ namespace VRTK
 
         protected virtual void OnEnable()
         {
-            pointerOriginTransform = (pointerOriginTransform == null ? VRTK_SDK_Bridge.GenerateControllerPointerOrigin(gameObject) : pointerOriginTransform);
-
-            if (controller == null)
+            controller = (controller ?? GetComponentInParent<VRTK_ControllerEvents>());
+            if (!controller)
             {
-                controller = GetComponent<VRTK_ControllerEvents>();
+                Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_ControllerEvents", "VRTK_UIPointer", "controller" }));
+                return;
             }
+
+            pointerOriginTransform = (pointerOriginTransform == null ? VRTK_SDK_Bridge.GenerateControllerPointerOrigin(controller.gameObject) : pointerOriginTransform);
+
             ConfigureEventSystem();
             pointerClicked = false;
             lastPointerPressState = false;
@@ -349,6 +352,8 @@ namespace VRTK
             {
                 cachedVRInputModule.pointers.Remove(this);
             }
+
+            controller = null;
         }
 
         private void ResetHoverTimer()

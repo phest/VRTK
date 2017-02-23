@@ -28,11 +28,17 @@ namespace VRTK
     /// <example>
     /// `VRTK/Examples/037_CameraRig_ClimbingFalling` shows how to set up a scene with player climbing. There are many different examples showing how the same system can be used in unique ways.
     /// </example>
-    [RequireComponent(typeof(VRTK_BodyPhysics))]
     public class VRTK_PlayerClimb : MonoBehaviour
     {
         [Tooltip("Will scale movement up and down based on the player transform's scale.")]
         public bool usePlayerScale = true;
+
+        [Header("Custom Settings")]
+
+        [Tooltip("The Teleporter to utilise. If the script is being applied on to the same GameObject as the teleport script then this parameter can be left blank as it will be auto populated at runtime.")]
+        public VRTK_BasicTeleport teleporter;
+        [Tooltip("The Body Physics to utilise. If the script is being applied on to the same GameObject as the body physics script then this parameter can be left blank as it will be auto populated at runtime.")]
+        public VRTK_BodyPhysics bodyPhysics;
 
         /// <summary>
         /// Emitted when player climbing has started.
@@ -50,18 +56,21 @@ namespace VRTK
         private GameObject grabbingController;
         private GameObject climbingObject;
         private Quaternion climbingObjectLastRotation;
-        private VRTK_BodyPhysics bodyPhysics;
         private bool isClimbing;
         private bool useGrabbedObjectRotation;
 
-        protected virtual void Awake()
-        {
-            playArea = VRTK_DeviceFinder.PlayAreaTransform();
-            bodyPhysics = GetComponent<VRTK_BodyPhysics>();
-        }
-
         protected virtual void OnEnable()
         {
+            playArea = VRTK_DeviceFinder.PlayAreaTransform();
+            teleporter = (teleporter ?? GetComponent<VRTK_BasicTeleport>());
+            bodyPhysics = (bodyPhysics ?? GetComponent<VRTK_BodyPhysics>());
+
+            if (!bodyPhysics)
+            {
+                Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_BodyPhysics", "VRTK_PlayerClimb", "bodyPhysics" }));
+                return;
+            }
+
             InitListeners(true);
         }
 
@@ -69,6 +78,8 @@ namespace VRTK
         {
             Ungrab(false, 0, climbingObject);
             InitListeners(false);
+            bodyPhysics = null;
+            teleporter = null;
         }
 
         protected virtual void Update()
@@ -126,16 +137,15 @@ namespace VRTK
 
         private void InitTeleportListener(bool state)
         {
-            var teleportComponent = GetComponent<VRTK_BasicTeleport>();
-            if (teleportComponent)
+            if (teleporter)
             {
                 if (state)
                 {
-                    teleportComponent.Teleporting += new TeleportEventHandler(OnTeleport);
+                    teleporter.Teleporting += new TeleportEventHandler(OnTeleport);
                 }
                 else
                 {
-                    teleportComponent.Teleporting -= new TeleportEventHandler(OnTeleport);
+                    teleporter.Teleporting -= new TeleportEventHandler(OnTeleport);
                 }
             }
         }
@@ -177,49 +187,56 @@ namespace VRTK
 
         private void Grab(GameObject currentGrabbingController, uint controllerIndex, GameObject target)
         {
-            bodyPhysics.TogglePreventSnapToFloor(true);
-            bodyPhysics.enableBodyCollisions = false;
-            bodyPhysics.ToggleOnGround(false);
+            if (bodyPhysics)
+            {
+                bodyPhysics.TogglePreventSnapToFloor(true);
+                bodyPhysics.enableBodyCollisions = false;
+                bodyPhysics.ToggleOnGround(false);
 
-            isClimbing = true;
-            climbingObject = target;
-            grabbingController = currentGrabbingController;
-            startControllerScaledLocalPosition = GetScaledLocalPosition(grabbingController.transform);
-            startGrabPointLocalPosition = climbingObject.transform.InverseTransformPoint(grabbingController.transform.position);
-            startPlayAreaWorldOffset = playArea.transform.position - grabbingController.transform.position;
-            climbingObjectLastRotation = climbingObject.transform.rotation;
-            useGrabbedObjectRotation = climbingObject.GetComponent<VRTK_ClimbableGrabAttach>().useObjectRotation;
+                isClimbing = true;
+                climbingObject = target;
+                grabbingController = currentGrabbingController;
+                startControllerScaledLocalPosition = GetScaledLocalPosition(grabbingController.transform);
+                startGrabPointLocalPosition = climbingObject.transform.InverseTransformPoint(grabbingController.transform.position);
+                startPlayAreaWorldOffset = playArea.transform.position - grabbingController.transform.position;
+                climbingObjectLastRotation = climbingObject.transform.rotation;
+                useGrabbedObjectRotation = climbingObject.GetComponent<VRTK_ClimbableGrabAttach>().useObjectRotation;
 
-            OnPlayerClimbStarted(SetPlayerClimbEvent(controllerIndex, climbingObject));
+                OnPlayerClimbStarted(SetPlayerClimbEvent(controllerIndex, climbingObject));
+            }
         }
 
         private void Ungrab(bool carryMomentum, uint controllerIndex, GameObject target)
         {
-            bodyPhysics.TogglePreventSnapToFloor(false);
-            bodyPhysics.enableBodyCollisions = true;
-
-            if (carryMomentum)
+            if (bodyPhysics)
             {
-                Vector3 velocity = Vector3.zero;
-                var device = VRTK_DeviceFinder.GetControllerByIndex(controllerIndex, false);
 
-                if (device)
+                bodyPhysics.TogglePreventSnapToFloor(false);
+                bodyPhysics.enableBodyCollisions = true;
+
+                if (carryMomentum)
                 {
-                    velocity = -VRTK_DeviceFinder.GetControllerVelocity(device);
-                    if (usePlayerScale)
+                    Vector3 velocity = Vector3.zero;
+                    var device = VRTK_DeviceFinder.GetControllerByIndex(controllerIndex, false);
+
+                    if (device)
                     {
-                        velocity = Vector3.Scale(velocity, playArea.localScale);
+                        velocity = -VRTK_DeviceFinder.GetControllerVelocity(device);
+                        if (usePlayerScale)
+                        {
+                            velocity = Vector3.Scale(velocity, playArea.localScale);
+                        }
                     }
+
+                    bodyPhysics.ApplyBodyVelocity(velocity, true, true);
                 }
 
-                bodyPhysics.ApplyBodyVelocity(velocity, true, true);
+                isClimbing = false;
+                grabbingController = null;
+                climbingObject = null;
+
+                OnPlayerClimbEnded(SetPlayerClimbEvent(controllerIndex, target));
             }
-
-            isClimbing = false;
-            grabbingController = null;
-            climbingObject = null;
-
-            OnPlayerClimbEnded(SetPlayerClimbEvent(controllerIndex, target));
         }
 
         private bool IsActiveClimbingController(GameObject controller)

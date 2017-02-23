@@ -23,6 +23,9 @@ namespace VRTK
         #region Variables
         [Tooltip("If the RadialMenu is the child of an object with VRTK_InteractableObject attached, this will be automatically obtained. It can also be manually set.")]
         public VRTK_InteractableObject eventsManager;
+
+        [Header("Independent Radial Menu Settings")]
+
         [Tooltip("Whether or not the script should dynamically add a SphereCollider to surround the menu.")]
         public bool addMenuCollider = true;
         [Tooltip("This times the size of the RadialMenu is the size of the collider.")]
@@ -52,7 +55,7 @@ namespace VRTK
         #region Init and Unity Methods
         public void UpdateEventsManager()
         {
-            VRTK_InteractableObject newEventsManager = transform.GetComponentInParent<VRTK_InteractableObject>();
+            VRTK_InteractableObject newEventsManager = GetComponentInParent<VRTK_InteractableObject>();
             if (newEventsManager == null)
             {
                 Debug.LogError("The radial menu must be a child of an interactable object or be set in the inspector!");
@@ -77,7 +80,7 @@ namespace VRTK
             }
         }
 
-        protected override void Initialize()
+        protected virtual void Initialize()
         {
             if (eventsManager == null)
             {
@@ -138,6 +141,7 @@ namespace VRTK
 
         protected override void OnEnable()
         {
+            menu = GetComponent<RadialMenu>();
             if (eventsManager != null)
             {
                 eventsManager.InteractableObjectUsed += ObjectClicked;
@@ -226,10 +230,13 @@ namespace VRTK
         {
             if (interactingObjects.Count > 0)
             {
-                var controllerActions = interactingObjects[0].GetComponent<VRTK_ControllerActions>();
-                if (controllerActions)
+                VRTK_InteractTouch interactTouch = interactingObjects[0].GetComponent<VRTK_InteractTouch>();
+                if (interactTouch)
                 {
-                    controllerActions.TriggerHapticPulse(strength);
+                    if (interactTouch.controllerActions)
+                    {
+                        interactTouch.controllerActions.TriggerHapticPulse(strength);
+                    }
                 }
             }
         }
@@ -324,11 +331,6 @@ namespace VRTK
         #endregion Helpers
 
         #region Unity Methods
-        protected override void Awake()
-        {
-            menu = GetComponent<RadialMenu>();
-        }
-
         protected virtual void Start()
         {
             Initialize();

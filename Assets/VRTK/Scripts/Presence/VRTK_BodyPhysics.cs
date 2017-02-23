@@ -83,6 +83,11 @@ namespace VRTK
         [Tooltip("The amount the `y` position needs to change by between the current floor `y` position and the previous floor `y` position before a change in floor height is considered to have occurred. A higher value here will mean that a `Drop To Floor` will be less likely to happen if the `y` of the floor beneath the user hasn't changed as much as the given threshold.")]
         public float floorHeightTolerance = 0.001f;
 
+        [Header("Custom Settings")]
+
+        [Tooltip("An optional Teleporter to utilise. If the script is being applied on to the same GameObject as the teleport script then this parameter can be left blank as it will be auto populated at runtime.")]
+        public VRTK_BasicTeleport teleporter;
+
         /// <summary>
         /// Emitted when a fall begins.
         /// </summary>
@@ -116,7 +121,6 @@ namespace VRTK
         private GameObject currentCollidingObject = null;
         private GameObject currentValidFloorObject = null;
 
-        private VRTK_BasicTeleport teleporter;
         private float lastFrameFloorY;
         private float hitFloorYDelta = 0f;
         private bool initialFloorDrop = false;
@@ -236,6 +240,7 @@ namespace VRTK
         protected override void OnEnable()
         {
             base.OnEnable();
+            teleporter = (teleporter ?? GetComponent<VRTK_BasicTeleport>());
             playArea = VRTK_DeviceFinder.PlayAreaTransform();
             headset = VRTK_DeviceFinder.HeadsetTransform();
             if (playArea)
@@ -255,6 +260,7 @@ namespace VRTK
             base.OnDisable();
             DisableDropToFloor();
             DisableBodyPhysics();
+            teleporter = null;
         }
 
         protected virtual void FixedUpdate()
@@ -549,7 +555,6 @@ namespace VRTK
         {
             initialFloorDrop = false;
             retogglePhysicsOnCanFall = false;
-            teleporter = GetComponent<VRTK_BasicTeleport>();
             if (teleporter)
             {
                 teleporter.Teleported += Teleporter_Teleported;

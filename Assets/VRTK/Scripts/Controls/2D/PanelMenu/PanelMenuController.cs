@@ -44,6 +44,11 @@ namespace VRTK
         [Tooltip("The right PanelMenuItemController, which is triggered by pressing right on the controller touchpad.")]
         public PanelMenuItemController rightPanelMenuItemController;
 
+        [Header("Custom Settings")]
+
+        [Tooltip("The controller to listen for the events on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
+        public VRTK_ControllerEvents controllerEvents;
+
         // Relates to scale of canvas on panel items.
         protected const float CanvasScaleSize = 0.001f;
 
@@ -51,8 +56,6 @@ namespace VRTK
         protected const float AngleTolerance = 30f;
         protected const float SwipeMinDist = 0.2f;
         protected const float SwipeMinVelocity = 4.0f;
-
-        private VRTK_ControllerEvents controllerEvents;
 
         private PanelMenuItemController currentPanelMenuItemController;
 
@@ -145,7 +148,7 @@ namespace VRTK
             if (controllerEvents == null)
             {
                 transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, transform.localPosition.z);
-                controllerEvents = GetComponentInParent<VRTK_ControllerEvents>();
+                controllerEvents = (controllerEvents ?? GetComponentInParent<VRTK_ControllerEvents>());
             }
         }
 
@@ -198,20 +201,26 @@ namespace VRTK
 
         private void BindControllerEvents()
         {
-            controllerEvents.TouchpadPressed += new ControllerInteractionEventHandler(DoTouchpadPress);
-            controllerEvents.TouchpadTouchStart += new ControllerInteractionEventHandler(DoTouchpadTouched);
-            controllerEvents.TouchpadTouchEnd += new ControllerInteractionEventHandler(DoTouchpadUntouched);
-            controllerEvents.TouchpadAxisChanged += new ControllerInteractionEventHandler(DoTouchpadAxisChanged);
-            controllerEvents.TriggerPressed += new ControllerInteractionEventHandler(DoTriggerPressed);
+            if (controllerEvents)
+            {
+                controllerEvents.TouchpadPressed += new ControllerInteractionEventHandler(DoTouchpadPress);
+                controllerEvents.TouchpadTouchStart += new ControllerInteractionEventHandler(DoTouchpadTouched);
+                controllerEvents.TouchpadTouchEnd += new ControllerInteractionEventHandler(DoTouchpadUntouched);
+                controllerEvents.TouchpadAxisChanged += new ControllerInteractionEventHandler(DoTouchpadAxisChanged);
+                controllerEvents.TriggerPressed += new ControllerInteractionEventHandler(DoTriggerPressed);
+            }
         }
 
         private void UnbindControllerEvents()
         {
-            controllerEvents.TouchpadPressed -= new ControllerInteractionEventHandler(DoTouchpadPress);
-            controllerEvents.TouchpadTouchStart -= new ControllerInteractionEventHandler(DoTouchpadTouched);
-            controllerEvents.TouchpadTouchEnd -= new ControllerInteractionEventHandler(DoTouchpadUntouched);
-            controllerEvents.TouchpadAxisChanged -= new ControllerInteractionEventHandler(DoTouchpadAxisChanged);
-            controllerEvents.TriggerPressed -= new ControllerInteractionEventHandler(DoTriggerPressed);
+            if (controllerEvents)
+            {
+                controllerEvents.TouchpadPressed -= new ControllerInteractionEventHandler(DoTouchpadPress);
+                controllerEvents.TouchpadTouchStart -= new ControllerInteractionEventHandler(DoTouchpadTouched);
+                controllerEvents.TouchpadTouchEnd -= new ControllerInteractionEventHandler(DoTouchpadUntouched);
+                controllerEvents.TouchpadAxisChanged -= new ControllerInteractionEventHandler(DoTouchpadAxisChanged);
+                controllerEvents.TriggerPressed -= new ControllerInteractionEventHandler(DoTriggerPressed);
+            }
         }
 
         private void HandlePanelMenuItemControllerVisibility(PanelMenuItemController targetPanelItemController)
@@ -274,9 +283,10 @@ namespace VRTK
 
         private void DoInteractableObjectIsGrabbed(object sender, InteractableObjectEventArgs e)
         {
-            controllerEvents = e.interactingObject.GetComponentInParent<VRTK_ControllerEvents>();
-            if (controllerEvents != null)
+            VRTK_InteractTouch eventInteractTouch = e.interactingObject.GetComponentInParent<VRTK_InteractTouch>();
+            if (eventInteractTouch != null)
             {
+                controllerEvents = eventInteractTouch.controllerEvents;
                 BindControllerEvents();
             }
             isGrabbed = true;

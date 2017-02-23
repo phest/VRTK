@@ -140,8 +140,9 @@ namespace VRTK
         protected override void OnEnable()
         {
             base.OnEnable();
+            controller = (controller ?? GetComponentInParent<VRTK_ControllerEvents>());
             VRTK_PlayerObject.SetPlayerObject(gameObject, VRTK_PlayerObject.ObjectTypes.Pointer);
-            customOrigin = (customOrigin == null ? VRTK_SDK_Bridge.GenerateControllerPointerOrigin(gameObject) : customOrigin);
+            customOrigin = (customOrigin == null ? VRTK_SDK_Bridge.GenerateControllerPointerOrigin(controller.gameObject) : customOrigin);
             SetupController();
             SetupRenderer();
             activateDelayTimer = 0f;
@@ -211,7 +212,7 @@ namespace VRTK
 
             if (controller == null)
             {
-                Debug.LogError("VRTK_Pointer requires a Controller that has the VRTK_ControllerEvents script attached to it.");
+                Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_ControllerEvents", "VRTK_Pointer", "controller" }));
             }
         }
 
