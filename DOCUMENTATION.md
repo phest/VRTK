@@ -1650,6 +1650,7 @@ The script also has a public boolean pressed state for the buttons to allow the 
 
 ### Inspector Parameters
 
+ * **Script Alias Object:** The script alias GameObject to listen to controller events on. If this is blank then the `VRTK_ControllerEvents` script needs applying to the script alias GameObject.
  * **Grab Toggle Button:** The button to use for the action of grabbing game objects.
  * **Use Toggle Button:** The button to use for the action of using game objects.
  * **Menu Toggle Button:** The button to use for the action of bringing up an in-game menu.

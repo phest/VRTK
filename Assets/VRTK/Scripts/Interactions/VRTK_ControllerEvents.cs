@@ -80,6 +80,9 @@ namespace VRTK
             StartMenuPress
         }
 
+        [Tooltip("The script alias GameObject to listen to controller events on. If this is blank then the `VRTK_ControllerEvents` script needs applying to the script alias GameObject.")]
+        public GameObject scriptAliasObject;
+
         [Header("Action Alias Buttons")]
 
         [Tooltip("The button to use for the action of turning a laser pointer on / off.")]
@@ -438,6 +441,9 @@ namespace VRTK
         /// Emitted when the controller index changed.
         /// </summary>
         public event ControllerInteractionEventHandler ControllerIndexChanged;
+
+        protected VRTK_ControllerTracker controllerTracker;
+        protected GameObject currentScriptAliasObject;
 
         private Vector2 touchpadAxis = Vector2.zero;
         private Vector2 triggerAxis = Vector2.zero;
@@ -829,7 +835,7 @@ namespace VRTK
         [Obsolete("`VRTK_ControllerEvents.GetVelocity()` has been replaced with `VRTK_DeviceFinder.GetControllerVelocity(givenController)`. This method will be removed in a future version of VRTK.")]
         public Vector3 GetVelocity()
         {
-            return VRTK_DeviceFinder.GetControllerVelocity(gameObject);
+            return VRTK_DeviceFinder.GetControllerVelocity(GetTrackedController());
         }
 
         /// <summary>
@@ -839,7 +845,7 @@ namespace VRTK
         [Obsolete("`VRTK_ControllerEvents.GetAngularVelocity()` has been replaced with `VRTK_DeviceFinder.GetControllerAngularVelocity(givenController)`. This method will be removed in a future version of VRTK.")]
         public Vector3 GetAngularVelocity()
         {
-            return VRTK_DeviceFinder.GetControllerAngularVelocity(gameObject);
+            return VRTK_DeviceFinder.GetControllerAngularVelocity(GetTrackedController());
         }
 
         /// <summary>
@@ -972,15 +978,18 @@ namespace VRTK
 
         protected virtual void OnEnable()
         {
-            var actualController = VRTK_DeviceFinder.GetActualController(gameObject);
+            scriptAliasObject = (scriptAliasObject != null ? scriptAliasObject : gameObject);
+            ManageControllerTracker();
+
+            GameObject actualController = VRTK_DeviceFinder.GetActualController(GetTrackedController());
             if (actualController)
             {
-                var controllerTracker = actualController.GetComponent<VRTK_TrackedController>();
-                if (controllerTracker)
+                VRTK_TrackedController trackedController = actualController.GetComponent<VRTK_TrackedController>();
+                if (trackedController)
                 {
-                    controllerTracker.ControllerEnabled += TrackedControllerEnabled;
-                    controllerTracker.ControllerDisabled += TrackedControllerDisabled;
-                    controllerTracker.ControllerIndexChanged += TrackedControllerIndexChanged;
+                    trackedController.ControllerEnabled += TrackedControllerEnabled;
+                    trackedController.ControllerDisabled += TrackedControllerDisabled;
+                    trackedController.ControllerIndexChanged += TrackedControllerIndexChanged;
                 }
             }
         }
@@ -988,21 +997,23 @@ namespace VRTK
         protected virtual void OnDisable()
         {
             Invoke("DisableEvents", 0f);
-            var actualController = VRTK_DeviceFinder.GetActualController(gameObject);
+            GameObject actualController = VRTK_DeviceFinder.GetActualController(GetTrackedController());
             if (actualController)
             {
-                var controllerTracker = actualController.GetComponent<VRTK_TrackedController>();
-                if (controllerTracker)
+                VRTK_TrackedController trackedController = actualController.GetComponent<VRTK_TrackedController>();
+                if (trackedController)
                 {
-                    controllerTracker.ControllerEnabled -= TrackedControllerEnabled;
-                    controllerTracker.ControllerDisabled -= TrackedControllerDisabled;
+                    trackedController.ControllerEnabled -= TrackedControllerEnabled;
+                    trackedController.ControllerDisabled -= TrackedControllerDisabled;
+                    trackedController.ControllerIndexChanged -= TrackedControllerIndexChanged;
                 }
             }
         }
 
         protected virtual void Update()
         {
-            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(gameObject);
+            ManageControllerTracker();
+            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(GetTrackedController());
 
             //Only continue if the controller index has been set to a sensible number
             if (controllerIndex >= uint.MaxValue)
@@ -1252,6 +1263,18 @@ namespace VRTK
 
             hairTriggerDelta = VRTK_SDK_Bridge.GetTriggerHairlineDeltaOnIndex(controllerIndex);
             hairGripDelta = VRTK_SDK_Bridge.GetGripHairlineDeltaOnIndex(controllerIndex);
+        }
+
+        protected virtual void ManageControllerTracker()
+        {
+            if (!scriptAliasObject.Equals(currentScriptAliasObject))
+            {
+                currentScriptAliasObject = scriptAliasObject;
+                if (currentScriptAliasObject)
+                {
+                    controllerTracker = currentScriptAliasObject.GetComponent<VRTK_ControllerTracker>();
+                }
+            }
         }
 
         protected void ButtonAliasEventSubscription(bool subscribe, ButtonAlias givenButton, bool startEvent, ControllerInteractionEventHandler callbackMethod)
@@ -1621,9 +1644,14 @@ namespace VRTK
             }
         }
 
+        protected virtual GameObject GetTrackedController()
+        {
+            return (controllerTracker != null ? controllerTracker.gameObject : null);
+        }
+
         private ControllerInteractionEventArgs SetButtonEvent(ref bool buttonBool, bool value, float buttonPressure)
         {
-            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(gameObject);
+            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(GetTrackedController());
             buttonBool = value;
             ControllerInteractionEventArgs e;
             e.controllerIndex = controllerIndex;
@@ -1847,7 +1875,7 @@ namespace VRTK
             gripAxisChanged = false;
             touchpadAxisChanged = false;
 
-            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(gameObject);
+            var controllerIndex = VRTK_DeviceFinder.GetControllerIndex(GetTrackedController());
 
             if (controllerIndex < uint.MaxValue)
             {
