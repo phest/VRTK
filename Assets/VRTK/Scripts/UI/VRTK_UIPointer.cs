@@ -387,10 +387,10 @@ namespace VRTK
 
         private IEnumerator WaitForPointerId()
         {
-            var index = (int)VRTK_SDK_Bridge.GetControllerIndex(controller.gameObject);
+            var index = (int)VRTK_DeviceFinder.GetControllerIndex(controller.gameObject);
             while (index < 0 || index == int.MaxValue)
             {
-                index = (int)VRTK_SDK_Bridge.GetControllerIndex(controller.gameObject);
+                index = (int)VRTK_DeviceFinder.GetControllerIndex(controller.gameObject);
                 yield return null;
             }
             pointerEventData.pointerId = index;
