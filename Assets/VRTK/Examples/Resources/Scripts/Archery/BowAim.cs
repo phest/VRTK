@@ -21,9 +21,6 @@
         private VRTK_ControllerEvents holdControl;
         private VRTK_ControllerEvents stringControl;
 
-        private VRTK_ControllerActions stringActions;
-        private VRTK_ControllerActions holdActions;
-
         private Quaternion releaseRotation;
         private Quaternion baseRotation;
         private bool fired;
@@ -65,17 +62,11 @@
             {
                 holdControl = VRTK_DeviceFinder.GetControllerLeftHand().GetComponent<VRTK_ControllerEvents>();
                 stringControl = VRTK_DeviceFinder.GetControllerRightHand().GetComponent<VRTK_ControllerEvents>();
-
-                holdActions = VRTK_DeviceFinder.GetControllerLeftHand().GetComponent<VRTK_ControllerActions>();
-                stringActions = VRTK_DeviceFinder.GetControllerRightHand().GetComponent<VRTK_ControllerActions>();
             }
             else
             {
                 stringControl = VRTK_DeviceFinder.GetControllerLeftHand().GetComponent<VRTK_ControllerEvents>();
                 holdControl = VRTK_DeviceFinder.GetControllerRightHand().GetComponent<VRTK_ControllerEvents>();
-
-                stringActions = VRTK_DeviceFinder.GetControllerLeftHand().GetComponent<VRTK_ControllerActions>();
-                holdActions = VRTK_DeviceFinder.GetControllerRightHand().GetComponent<VRTK_ControllerActions>();
             }
             StartCoroutine("GetBaseRotation");
         }
@@ -172,8 +163,8 @@
 
             if (!currentPull.ToString("F2").Equals(previousPull.ToString("F2")))
             {
-                holdActions.TriggerHapticPulse(bowVibration);
-                stringActions.TriggerHapticPulse(stringVibration);
+                VRTK_SharedMethods.TriggerHapticPulse(VRTK_DeviceFinder.GetControllerIndex(holdControl.GetTrackedHand()), bowVibration);
+                VRTK_SharedMethods.TriggerHapticPulse(VRTK_DeviceFinder.GetControllerIndex(stringControl.GetTrackedHand()), stringVibration);
             }
             previousPull = currentPull;
         }

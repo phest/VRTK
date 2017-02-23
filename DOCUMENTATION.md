@@ -1825,6 +1825,17 @@ Adding the `VRTK_ControllerEvents_UnityEvents` component to `VRTK_ControllerEven
 
 ### Class Methods
 
+#### GetTrackedHand/0
+
+  > `public virtual GameObject GetTrackedHand()`
+
+  * Parameters
+   * _none_
+  * Returns
+   * `GameObject` - The GameObject of the controller that is having the events tracked.
+
+The GetTrackedHand method returns the current controller the events are tracking to.
+
 #### GetTouchpadAxis/0
 
   > `public Vector2 GetTouchpadAxis()`
@@ -2169,30 +2180,6 @@ The ToggleHighlighBody method is a shortcut method that makes it easier to toggl
    * _none_
 
 The ToggleHighlightController method is a shortcut method that makes it easier to toggle the highlight state of the entire controller.
-
-#### TriggerHapticPulse/1
-
-  > `public virtual void TriggerHapticPulse(float strength)`
-
-  * Parameters
-   * `float strength` - The intensity of the rumble of the controller motor. `0` to `1`.
-  * Returns
-   * _none_
-
-The TriggerHapticPulse/1 method calls a single haptic pulse call on the controller for a single tick.
-
-#### TriggerHapticPulse/3
-
-  > `public virtual void TriggerHapticPulse(float strength, float duration, float pulseInterval)`
-
-  * Parameters
-   * `float strength` - The intensity of the rumble of the controller motor. `0` to `1`.
-   * `float duration` - The length of time the rumble should continue for.
-   * `float pulseInterval` - The interval to wait between each haptic pulse.
-  * Returns
-   * _none_
-
-The TriggerHapticPulse/3 method calls a haptic pulse for a specified amount of time rather than just a single tick. Each pulse can be separated by providing a `pulseInterval` to pause between each haptic pulse.
 
 #### InitaliseHighlighters/0
 
@@ -2956,10 +2943,10 @@ The Interact Haptics script is attached on the same GameObject as an Interactabl
 
 #### HapticsOnTouch/1
 
-  > `public virtual void HapticsOnTouch(VRTK_ControllerActions controllerActions)`
+  > `public virtual void HapticsOnTouch(uint controllerIndex)`
 
   * Parameters
-   * `VRTK_ControllerActions controllerActions` - The controller to activate the haptic feedback on.
+   * `uint controllerIndex` - The controller index to activate the haptic feedback on.
   * Returns
    * _none_
 
@@ -2967,10 +2954,10 @@ The HapticsOnTouch method triggers the haptic feedback on the given controller f
 
 #### HapticsOnGrab/1
 
-  > `public virtual void HapticsOnGrab(VRTK_ControllerActions controllerActions)`
+  > `public virtual void HapticsOnGrab(uint controllerIndex)`
 
   * Parameters
-   * `VRTK_ControllerActions controllerActions` - The controller to activate the haptic feedback on.
+   * `uint controllerIndex` - The controller index to activate the haptic feedback on.
   * Returns
    * _none_
 
@@ -2978,10 +2965,10 @@ The HapticsOnGrab method triggers the haptic feedback on the given controller fo
 
 #### HapticsOnUse/1
 
-  > `public virtual void HapticsOnUse(VRTK_ControllerActions controllerActions)`
+  > `public virtual void HapticsOnUse(uint controllerIndex)`
 
   * Parameters
-   * `VRTK_ControllerActions controllerActions` - The controller to activate the haptic feedback on.
+   * `uint controllerIndex` - The controller index to activate the haptic feedback on.
   * Returns
    * _none_
 
@@ -5601,6 +5588,30 @@ The ColorDarken method takes a given colour and darkens it by the given percenta
    * `bool` - Returns true if Unity is in the Unity Editor and not in play mode.
 
 The IsEditTime method determines if the state of Unity is in the Unity Editor and the scene is not in play mode.
+
+#### TriggerHapticPulse/2
+
+  > `public static void TriggerHapticPulse(uint controllerIndex, float strength)`
+
+  * Parameters
+   * `float strength` - The intensity of the rumble of the controller motor. `0` to `1`.
+  * Returns
+   * _none_
+
+The TriggerHapticPulse/1 method calls a single haptic pulse call on the controller for a single tick.
+
+#### TriggerHapticPulse/4
+
+  > `public static void TriggerHapticPulse(uint controllerIndex, float strength, float duration, float pulseInterval)`
+
+  * Parameters
+   * `float strength` - The intensity of the rumble of the controller motor. `0` to `1`.
+   * `float duration` - The length of time the rumble should continue for.
+   * `float pulseInterval` - The interval to wait between each haptic pulse.
+  * Returns
+   * _none_
+
+The TriggerHapticPulse/3 method calls a haptic pulse for a specified amount of time rather than just a single tick. Each pulse can be separated by providing a `pulseInterval` to pause between each haptic pulse.
 
 ---
 

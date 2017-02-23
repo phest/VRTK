@@ -349,7 +349,7 @@ namespace VRTK
                 if (doHaptics)
                 {
                     triggerRumble = true;
-                    doHaptics.HapticsOnTouch(controllerActions);
+                    doHaptics.HapticsOnTouch(VRTK_DeviceFinder.GetControllerIndex(controllerEvents.GetTrackedHand()));
                     Invoke("ResetTriggerRumble", doHaptics.durationOnTouch);
                 }
             }

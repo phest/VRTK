@@ -358,37 +358,6 @@ namespace VRTK
         }
 
         /// <summary>
-        /// The TriggerHapticPulse/1 method calls a single haptic pulse call on the controller for a single tick.
-        /// </summary>
-        /// <param name="strength">The intensity of the rumble of the controller motor. `0` to `1`.</param>
-        public virtual void TriggerHapticPulse(float strength)
-        {
-            if (enabled)
-            {
-                CancelHapticPulse();
-                var hapticPulseStrength = Mathf.Clamp(strength, 0f, 1f);
-                VRTK_SDK_Bridge.HapticPulseOnIndex(VRTK_DeviceFinder.GetControllerIndex(gameObject), hapticPulseStrength);
-            }
-        }
-
-        /// <summary>
-        /// The TriggerHapticPulse/3 method calls a haptic pulse for a specified amount of time rather than just a single tick. Each pulse can be separated by providing a `pulseInterval` to pause between each haptic pulse.
-        /// </summary>
-        /// <param name="strength">The intensity of the rumble of the controller motor. `0` to `1`.</param>
-        /// <param name="duration">The length of time the rumble should continue for.</param>
-        /// <param name="pulseInterval">The interval to wait between each haptic pulse.</param>
-        public virtual void TriggerHapticPulse(float strength, float duration, float pulseInterval)
-        {
-            if (enabled)
-            {
-                CancelHapticPulse();
-                var hapticPulseStrength = Mathf.Clamp(strength, 0f, 1f);
-                var hapticModifiers = VRTK_SDK_Bridge.GetHapticModifiers();
-                hapticLoop = StartCoroutine(HapticPulse(duration * hapticModifiers.durationModifier, hapticPulseStrength, pulseInterval * hapticModifiers.intervalModifier));
-            }
-        }
-
-        /// <summary>
         /// The InitaliseHighlighters method sets up the highlighters on the controller model.
         /// </summary>
         public virtual void InitaliseHighlighters()
@@ -483,29 +452,6 @@ namespace VRTK
                 var highlighter = (overrideHighlighter != null ? overrideHighlighter : parentHighlighter);
                 VRTK_BaseHighlighter clonedHighlighter = (VRTK_BaseHighlighter)VRTK_SharedMethods.CloneComponent(highlighter, element.gameObject);
                 clonedHighlighter.Initialise(null, highlighterOptions);
-            }
-        }
-
-        private void CancelHapticPulse()
-        {
-            if (hapticLoop != null)
-            {
-                StopCoroutine(hapticLoop);
-            }
-        }
-
-        private IEnumerator HapticPulse(float duration, float hapticPulseStrength, float pulseInterval)
-        {
-            if (pulseInterval <= 0)
-            {
-                yield break;
-            }
-
-            while (duration > 0)
-            {
-                VRTK_SDK_Bridge.HapticPulseOnIndex(VRTK_DeviceFinder.GetControllerIndex(gameObject), hapticPulseStrength);
-                yield return new WaitForSeconds(pulseInterval);
-                duration -= pulseInterval;
             }
         }
 

@@ -368,7 +368,7 @@ namespace VRTK
                 var doHaptics = grabbedObject.GetComponentInParent<VRTK_InteractHaptics>();
                 if (doHaptics)
                 {
-                    doHaptics.HapticsOnGrab(controllerActions);
+                    doHaptics.HapticsOnTouch(VRTK_DeviceFinder.GetControllerIndex(controllerEvents.GetTrackedHand()));
                 }
             }
         }

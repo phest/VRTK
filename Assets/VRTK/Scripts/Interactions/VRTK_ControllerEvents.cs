@@ -827,6 +827,22 @@ namespace VRTK
         }
 
         /// <summary>
+        /// The GetTrackedHand method returns the current controller the events are tracking to.
+        /// </summary>
+        /// <returns>The GameObject of the controller that is having the events tracked.</returns>
+        public virtual GameObject GetTrackedHand()
+        {
+            switch (trackedHand)
+            {
+                case ControllerHands.Left:
+                    return VRTK_DeviceFinder.GetControllerLeftHand();
+                case ControllerHands.Right:
+                    return VRTK_DeviceFinder.GetControllerRightHand();
+            }
+            return gameObject;
+        }
+
+        /// <summary>
         /// The GetVelocity method is useful for getting the current velocity of the physical game controller. This can be useful to determine the speed at which the controller is being swung or the direction it is being moved in.
         /// </summary>
         /// <returns>A 3 dimensional vector containing the current real world physical controller velocity.</returns>
@@ -1623,18 +1639,6 @@ namespace VRTK
                     }
                     break;
             }
-        }
-
-        protected virtual GameObject GetTrackedHand()
-        {
-            switch(trackedHand)
-            {
-                case ControllerHands.Left:
-                    return VRTK_DeviceFinder.GetControllerLeftHand();
-                case ControllerHands.Right:
-                    return VRTK_DeviceFinder.GetControllerRightHand();
-            }
-            return gameObject;
         }
 
         private ControllerInteractionEventArgs SetButtonEvent(ref bool buttonBool, bool value, float buttonPressure)

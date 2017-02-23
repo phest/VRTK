@@ -199,6 +199,7 @@ namespace VRTK
                 SetupHeadset();
                 SetupControllers();
                 GetBoundariesSDK().InitBoundaries();
+                gameObject.AddComponent<VRTK_InstanceMethods>();
             }
         }
 

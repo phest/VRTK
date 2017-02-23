@@ -233,9 +233,9 @@ namespace VRTK
                 VRTK_InteractTouch interactTouch = interactingObjects[0].GetComponent<VRTK_InteractTouch>();
                 if (interactTouch)
                 {
-                    if (interactTouch.controllerActions)
+                    if (interactTouch.controllerEvents)
                     {
-                        interactTouch.controllerActions.TriggerHapticPulse(strength);
+                        VRTK_SharedMethods.TriggerHapticPulse(VRTK_DeviceFinder.GetControllerIndex(interactTouch.controllerEvents.GetTrackedHand()), strength);
                     }
                 }
             }

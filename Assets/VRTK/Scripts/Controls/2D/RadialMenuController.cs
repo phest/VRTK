@@ -10,8 +10,6 @@ namespace VRTK
 
         [Tooltip("The controller to listen for the events on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
         public VRTK_ControllerEvents events;
-        [Tooltip("The controller to perform actions on. If the script is being applied onto a controller then this parameter can be left blank as it will be auto populated by the controller the script is on at runtime.")]
-        public VRTK_ControllerActions controllerActions;
 
         protected RadialMenu menu;
         private float currentAngle; //Keep track of angle for when we click
@@ -27,8 +25,6 @@ namespace VRTK
                 Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_ControllerEvents", "RadialMenuController", "events" }));
                 return;
             }
-
-            controllerActions = (controllerActions ?? GetComponentInParent<VRTK_ControllerActions>());
 
             events.TouchpadPressed += new ControllerInteractionEventHandler(DoTouchpadClicked);
             events.TouchpadReleased += new ControllerInteractionEventHandler(DoTouchpadUnclicked);
@@ -50,7 +46,6 @@ namespace VRTK
             menu.FireHapticPulse -= new HapticPulseEventHandler(AttemptHapticPulse);
 
             events = null;
-            controllerActions = null;
             menu = null;
         }
 
@@ -85,9 +80,9 @@ namespace VRTK
 
         protected virtual void AttemptHapticPulse(float strength)
         {
-            if (controllerActions)
+            if (events)
             {
-                controllerActions.TriggerHapticPulse(strength);
+                VRTK_SharedMethods.TriggerHapticPulse(VRTK_DeviceFinder.GetControllerIndex(events.GetTrackedHand()), strength);
             }
         }
 
