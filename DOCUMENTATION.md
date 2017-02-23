@@ -289,9 +289,9 @@ If the `Use Joint` Snap Type is selected then a custom Joint component is requir
 ### Class Variables
 
  * `public enum SnapTypes` - The types of snap on release available.
-  * `Use_Kinematic` - Will set the interactable object rigidbody to `isKinematic = true`.
-  * `Use_Joint` - Will attach the interactable object's rigidbody to the provided joint as it's `Connected Body`.
-  * `Use_Parenting` - Will set the SnapDropZone as the interactable object's parent and set it's rigidbody to `isKinematic = true`.
+  * `UseKinematic` - Will set the interactable object rigidbody to `isKinematic = true`.
+  * `UseJoint` - Will attach the interactable object's rigidbody to the provided joint as it's `Connected Body`.
+  * `UseParenting` - Will set the SnapDropZone as the interactable object's parent and set it's rigidbody to `isKinematic = true`.
 
 ### Class Events
 
@@ -1661,21 +1661,21 @@ The script also has a public boolean pressed state for the buttons to allow the 
 
  * `public enum ButtonAlias` - Button types
   * `Undefined` - No button specified
-  * `Trigger_Hairline` - The trigger is squeezed past the current hairline threshold.
-  * `Trigger_Touch` - The trigger is squeezed a small amount.
-  * `Trigger_Press` - The trigger is squeezed about half way in.
-  * `Trigger_Click` - The trigger is squeezed all the way down.
-  * `Grip_Hairline` - The grip is squeezed past the current hairline threshold.
-  * `Grip_Touch` - The grip button is touched.
-  * `Grip_Press` - The grip button is pressed.
-  * `Grip_Click` - The grip button is pressed all the way down.
-  * `Touchpad_Touch` - The touchpad is touched (without pressing down to click).
-  * `Touchpad_Press` - The touchpad is pressed (to the point of hearing a click).
-  * `Button_One_Touch` - The button one is touched.
-  * `Button_One_Press` - The button one is pressed.
-  * `Button_Two_Touch` - The button one is touched.
-  * `Button_Two_Press` - The button one is pressed.
-  * `Start_Menu_Press` - The button one is pressed.
+  * `TriggerHairline` - The trigger is squeezed past the current hairline threshold.
+  * `TriggerTouch` - The trigger is squeezed a small amount.
+  * `TriggerPress` - The trigger is squeezed about half way in.
+  * `TriggerClick` - The trigger is squeezed all the way down.
+  * `GripHairline` - The grip is squeezed past the current hairline threshold.
+  * `GripTouch` - The grip button is touched.
+  * `GripPress` - The grip button is pressed.
+  * `GripClick` - The grip button is pressed all the way down.
+  * `TouchpadTouch` - The touchpad is touched (without pressing down to click).
+  * `TouchpadPress` - The touchpad is pressed (to the point of hearing a click).
+  * `ButtonOneTouch` - The button one is touched.
+  * `ButtonOnePress` - The button one is pressed.
+  * `ButtonTwoTouch` - The button one is touched.
+  * `ButtonTwoPress` - The button one is pressed.
+  * `StartMenuPress` - The button one is pressed.
  * `public bool triggerPressed` - This will be true if the trigger is squeezed about half way in. Default: `false`
  * `public bool triggerTouched` - This will be true if the trigger is squeezed a small amount. Default: `false`
  * `public bool triggerHairlinePressed` - This will be true if the trigger is squeezed a small amount more from any previous squeeze on the trigger. Default: `false`
@@ -2233,12 +2233,12 @@ The highlighting of an Interactable Object is defaulted to use the `VRTK_Materia
 
  * `public enum AllowedController` - Allowed controller type.
   * `Both` - Both controllers are allowed to interact.
-  * `Left_Only` - Only the left controller is allowed to interact.
-  * `Right_Only` - Only the right controller is allowed to interact.
+  * `LeftOnly` - Only the left controller is allowed to interact.
+  * `RightOnly` - Only the right controller is allowed to interact.
  * `public enum ValidDropTypes` - The types of valid situations that the object can be released from grab.
-  * `No_Drop` - The object cannot be dropped via the controller
-  * `Drop_Anywhere` - The object can be dropped anywhere in the scene via the controller.
-  * `Drop_ValidSnapDropZone` - The object can only be dropped when it is hovering over a valid snap drop zone.
+  * `NoDrop` - The object cannot be dropped via the controller
+  * `DropAnywhere` - The object can be dropped anywhere in the scene via the controller.
+  * `DropValidSnapDropZone` - The object can only be dropped when it is hovering over a valid snap drop zone.
  * `public int usingState` - The current using state of the object. `0` not being used, `1` being used. Default: `0`
  * `public bool isKinematic` - isKinematic is a pass through to the `isKinematic` getter/setter on the object's rigidbody component.
 
@@ -4368,11 +4368,11 @@ To allow for peeking over a ledge and not falling, a fall restiction can happen 
 ### Class Variables
 
  * `public enum FallingRestrictors` - Options for testing if a play space fall is valid
-  * `No_Restriction` - Always drop to nearest floor when the headset is no longer over the current standing object.
-  * `Left_Controller` - Don't drop to nearest floor  if the Left Controller is still over the current standing object even if the headset isn't.
-  * `Right_Controller` - Don't drop to nearest floor  if the Right Controller is still over the current standing object even if the headset isn't.
-  * `Either_Controller` - Don't drop to nearest floor  if Either Controller is still over the current standing object even if the headset isn't.
-  * `Both_Controllers` - Don't drop to nearest floor only if Both Controllers are still over the current standing object even if the headset isn't.
+  * `NoRestriction` - Always drop to nearest floor when the headset is no longer over the current standing object.
+  * `LeftController` - Don't drop to nearest floor  if the Left Controller is still over the current standing object even if the headset isn't.
+  * `RightController` - Don't drop to nearest floor  if the Right Controller is still over the current standing object even if the headset isn't.
+  * `EitherController` - Don't drop to nearest floor  if Either Controller is still over the current standing object even if the headset isn't.
+  * `BothControllers` - Don't drop to nearest floor only if Both Controllers are still over the current standing object even if the headset isn't.
 
 ### Class Events
 
@@ -5213,8 +5213,8 @@ The Device Finder offers a collection of static methods that can be called to fi
 
  * `public enum Devices` - Possible devices.
   * `Headset` - The headset.
-  * `Left_Controller` - The left hand controller.
-  * `Right_Controller` - The right hand controller.
+  * `LeftController` - The left hand controller.
+  * `RightController` - The right hand controller.
  * `public enum Headsets` - Possible headsets
   * `Unknown` - An unknown headset.
   * `OculusRift` - A summary of all Oculus Rift headset versions.
