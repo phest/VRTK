@@ -1651,8 +1651,6 @@ The script also has a public boolean pressed state for the buttons to allow the 
 ### Inspector Parameters
 
  * **Script Alias Object:** The script alias GameObject to listen to controller events on. If this is blank then the `VRTK_ControllerEvents` script needs applying to the script alias GameObject.
- * **Grab Toggle Button:** The button to use for the action of grabbing game objects.
- * **Use Toggle Button:** The button to use for the action of using game objects.
  * **Menu Toggle Button:** The button to use for the action of bringing up an in-game menu.
  * **Axis Fidelity:** The amount of fidelity in the changes on the axis, which is defaulted to 1. Any number higher than 2 will probably give too sensitive results.
  * **Trigger Click Threshold:** The level on the trigger axis to reach before a click is registered.
@@ -2655,7 +2653,7 @@ Adding the `VRTK_InteractTouch_UnityEvents` component to `VRTK_InteractTouch` ob
 
 #### ForceTouch/1
 
-  > `public void ForceTouch(GameObject obj)`
+  > `public virtual void ForceTouch(GameObject obj)`
 
   * Parameters
    * `GameObject obj` - The game object to attempt to force touch.
@@ -2666,7 +2664,7 @@ The ForceTouch method will attempt to force the controller to touch the given ga
 
 #### GetTouchedObject/0
 
-  > `public GameObject GetTouchedObject()`
+  > `public virtual GameObject GetTouchedObject()`
 
   * Parameters
    * _none_
@@ -2677,7 +2675,7 @@ The GetTouchedObject method returns the current object being touched by the cont
 
 #### IsObjectInteractable/1
 
-  > `public bool IsObjectInteractable(GameObject obj)`
+  > `public virtual bool IsObjectInteractable(GameObject obj)`
 
   * Parameters
    * `GameObject obj` - The game object to check to see if it's interactable.
@@ -2688,7 +2686,7 @@ The IsObjectInteractable method is used to check if a given game object is of ty
 
 #### ToggleControllerRigidBody/2
 
-  > `public void ToggleControllerRigidBody(bool state, bool forceToggle = false)`
+  > `public virtual void ToggleControllerRigidBody(bool state, bool forceToggle = false)`
 
   * Parameters
    * `bool state` - The state of whether the rigidbody is on or off. `true` toggles the rigidbody on and `false` turns it off.
@@ -2700,7 +2698,7 @@ The ToggleControllerRigidBody method toggles the controller's rigidbody's abilit
 
 #### IsRigidBodyActive/0
 
-  > `public bool IsRigidBodyActive()`
+  > `public virtual bool IsRigidBodyActive()`
 
   * Parameters
    * _none_
@@ -2711,7 +2709,7 @@ The IsRigidBodyActive method checks to see if the rigidbody on the controller ob
 
 #### IsRigidBodyForcedActive/0
 
-  > `public bool IsRigidBodyForcedActive()`
+  > `public virtual bool IsRigidBodyForcedActive()`
 
   * Parameters
    * _none_
@@ -2722,7 +2720,7 @@ The IsRigidBodyForcedActive method checks to see if the rigidbody on the control
 
 #### ForceStopTouching/0
 
-  > `public void ForceStopTouching()`
+  > `public virtual void ForceStopTouching()`
 
   * Parameters
    * _none_
@@ -2733,7 +2731,7 @@ The ForceStopTouching method will stop the controller from touching an object ev
 
 #### ControllerColliders/0
 
-  > `public Collider[] ControllerColliders()`
+  > `public virtual Collider[] ControllerColliders()`
 
   * Parameters
    * _none_
@@ -2768,10 +2766,12 @@ The interactable objects require a collider to activate the trigger and a rigidb
 
 ### Inspector Parameters
 
- * **Controller Attach Point:** The rigidbody point on the controller model to snap the grabbed object to. If blank it will be set to the SDK default.
+ * **Grab Button:** The button used to grab/release a touched object.
  * **Grab Precognition:** An amount of time between when the grab button is pressed to when the controller is touching something to grab it. For example, if an object is falling at a fast rate, then it is very hard to press the grab button in time to catch the object due to human reaction times. A higher number here will mean the grab button can be pressed before the controller touches the object and when the collision takes place, if the grab button is still being held down then the grab action will be successful.
  * **Throw Multiplier:** An amount to multiply the velocity of any objects being thrown. This can be useful when scaling up the play area to simulate being able to throw items further.
  * **Create Rigid Body When Not Touching:** If this is checked and the controller is not touching an Interactable Object when the grab button is pressed then a rigid body is added to the controller to allow the controller to push other rigid body objects around.
+ * **Interact Touch:** The Interact Touch script that is used to determine if an object is valid to grab. If this is left blank then the Interact Touch script will be required to be on the same GameObject as this script.
+ * **Controller Attach Point:** The rigidbody point on the controller model to snap the grabbed object to. If blank it will be set to the SDK default.
 
 ### Class Events
 
@@ -2794,7 +2794,7 @@ Adding the `VRTK_InteractGrab_UnityEvents` component to `VRTK_InteractGrab` obje
 
 #### ForceRelease/1
 
-  > `public void ForceRelease(bool applyGrabbingObjectVelocity = false)`
+  > `public virtual void ForceRelease(bool applyGrabbingObjectVelocity = false)`
 
   * Parameters
    * `bool applyGrabbingObjectVelocity` - If this is true then upon releasing the object any velocity on the grabbing object will be applied to the object to essentiall throw it. Defaults to `false`.
@@ -2805,7 +2805,7 @@ The ForceRelease method will force the controller to stop grabbing the currently
 
 #### AttemptGrab/0
 
-  > `public void AttemptGrab()`
+  > `public virtual void AttemptGrab()`
 
   * Parameters
    * _none_
@@ -2816,7 +2816,7 @@ The AttemptGrab method will attempt to grab the currently touched object without
 
 #### GetGrabbedObject/0
 
-  > `public GameObject GetGrabbedObject()`
+  > `public virtual GameObject GetGrabbedObject()`
 
   * Parameters
    * _none_
@@ -2849,6 +2849,11 @@ An object can be used if the Controller touches a game object which contains the
 
 If a valid interactable object is usable then pressing the set `Use` button on the Controller (default is `Trigger`) will call the `StartUsing` method on the touched interactable object.
 
+### Inspector Parameters
+
+ * **Use Button:** The button used to use/unuse a touched object.
+ * **Interact Touch:** The Interact Touch script that is used to determine if an object is valid to use. If this is left blank then the Interact Touch script will be required to be on the same GameObject as this script.
+
 ### Class Events
 
  * `ControllerUseInteractableObject` - Emitted when a valid object starts being used.
@@ -2870,7 +2875,7 @@ Adding the `VRTK_InteractUse_UnityEvents` component to `VRTK_InteractUse` object
 
 #### GetUsingObject/0
 
-  > `public GameObject GetUsingObject()`
+  > `public virtual GameObject GetUsingObject()`
 
   * Parameters
    * _none_
@@ -2881,7 +2886,7 @@ The GetUsingObject method returns the current object being used by the controlle
 
 #### ForceStopUsing/0
 
-  > `public void ForceStopUsing()`
+  > `public virtual void ForceStopUsing()`
 
   * Parameters
    * _none_
@@ -2892,7 +2897,7 @@ The ForceStopUsing method will force the controller to stop using the currently 
 
 #### ForceResetUsing/0
 
-  > `public void ForceResetUsing()`
+  > `public virtual void ForceResetUsing()`
 
   * Parameters
    * _none_
@@ -5478,6 +5483,18 @@ The PlayAreaTransform method is used to retrieve the transform for the play area
 The Shared Methods script is a collection of reusable static methods that are used across a range of different scripts.
 
 ### Class Methods
+
+#### GetCommonString/2
+
+  > `public static string GetCommonString(string stringKey, string[] parameters)`
+
+  * Parameters
+   * `string stringKey` - The key of the string within `commonStrings` dictionary to return.
+   * `string[] parameters` - An array of parameters to pass if the string can substitute certain sections.
+  * Returns
+   * `string` - The formatted common string.
+
+The GetCommonString method is used to return a common string.
 
 #### GetBounds/3
 

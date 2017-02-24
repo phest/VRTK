@@ -85,17 +85,19 @@ namespace VRTK
 
         [Header("Action Alias Buttons")]
 
-        [Tooltip("The button to use for the action of turning a laser pointer on / off.")]
+        [Tooltip("**OBSOLETE** The button to use for the action of turning a laser pointer on / off.")]
         [Obsolete("`VRTK_ControllerEvents.pointerToggleButton` is no longer used in the new `VRTK_Pointer` class. This parameter will be removed in a future version of VRTK.")]
         public ButtonAlias pointerToggleButton = ButtonAlias.TouchpadPress;
-        [Tooltip("The button to use for the action of setting a destination marker from the cursor position of the pointer.")]
+        [Tooltip("**OBSOLETE** The button to use for the action of setting a destination marker from the cursor position of the pointer.")]
         [Obsolete("`VRTK_ControllerEvents.pointerSetButton` is no longer used in the new `VRTK_Pointer` class. This parameter will be removed in a future version of VRTK.")]
         public ButtonAlias pointerSetButton = ButtonAlias.TouchpadPress;
-        [Tooltip("The button to use for the action of grabbing game objects.")]
+        [Tooltip("**OBSOLETE** The button to use for the action of grabbing game objects.")]
+        [Obsolete("`VRTK_ControllerEvents.grabToggleButton` is no longer used in the `VRTK_InteractGrab` class. This parameter will be removed in a future version of VRTK.")]
         public ButtonAlias grabToggleButton = ButtonAlias.GripPress;
-        [Tooltip("The button to use for the action of using game objects.")]
+        [Tooltip("**OBSOLETE** The button to use for the action of using game objects.")]
+        [Obsolete("`VRTK_ControllerEvents.useToggleButton` is no longer used in the `VRTK_InteractUse` class. This parameter will be removed in a future version of VRTK.")]
         public ButtonAlias useToggleButton = ButtonAlias.TriggerPress;
-        [Tooltip("The button to use for the action of clicking a UI element.")]
+        [Tooltip("**OBSOLETE** The button to use for the action of clicking a UI element.")]
         [Obsolete("`VRTK_ControllerEvents.uiClickButton` is no longer used in the `VRTK_UIPointer` class. This parameter will be removed in a future version of VRTK.")]
         public ButtonAlias uiClickButton = ButtonAlias.TriggerPress;
         [Tooltip("The button to use for the action of bringing up an in-game menu.")]
