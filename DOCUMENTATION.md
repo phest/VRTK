@@ -2630,6 +2630,7 @@ A custom collider can be provided by the Custom Rigidbody Object parameter.
 
 ### Inspector Parameters
 
+ * **Script Alias Object:** The script alias GameObject to listen to touch events on. If this is blank then the `VRTK_InteractTouch` script needs applying to the script alias GameObject.
  * **Custom Rigidbody Object:** If a custom rigidbody and collider for the rigidbody are required, then a gameobject containing a rigidbody and collider can be passed into this parameter. If this is empty then the rigidbody and collider will be auto generated at runtime to match the SDK default controller.
 
 ### Class Events

@@ -925,12 +925,15 @@ namespace VRTK
 
         private void ResetUseState(GameObject checkObject)
         {
-            var usingObjectCheck = checkObject.GetComponent<VRTK_InteractUse>();
-            if (usingObjectCheck)
+            if (checkObject)
             {
-                if (holdButtonToUse)
+                var usingObjectCheck = checkObject.GetComponent<VRTK_InteractUse>();
+                if (usingObjectCheck)
                 {
-                    usingObjectCheck.ForceStopUsing();
+                    if (holdButtonToUse)
+                    {
+                        usingObjectCheck.ForceStopUsing();
+                    }
                 }
             }
         }

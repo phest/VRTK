@@ -240,12 +240,12 @@ namespace VRTK
 
         protected virtual void SetControllerAttachPoint()
         {
-            var modelController = VRTK_DeviceFinder.GetModelAliasController(interactTouch.gameObject);
+            var modelController = VRTK_DeviceFinder.GetModelAliasController(interactTouch.scriptAliasObject);
             //If no attach point has been specified then just use the tip of the controller
             if (modelController && controllerAttachPoint == null)
             {
                 //attempt to find the attach point on the controller
-                var defaultAttachPoint = modelController.transform.Find(VRTK_SDK_Bridge.GetControllerElementPath(SDK_BaseController.ControllerElements.AttachPoint, VRTK_DeviceFinder.GetControllerHand(interactTouch.gameObject)));
+                var defaultAttachPoint = modelController.transform.Find(VRTK_SDK_Bridge.GetControllerElementPath(SDK_BaseController.ControllerElements.AttachPoint, VRTK_DeviceFinder.GetControllerHand(interactTouch.scriptAliasObject)));
                 if (defaultAttachPoint != null)
                 {
                     controllerAttachPoint = defaultAttachPoint.GetComponent<Rigidbody>();
@@ -318,7 +318,7 @@ namespace VRTK
 
         protected virtual void InitPrimaryGrab(VRTK_InteractableObject currentGrabbedObject)
         {
-            var grabbingObject = interactTouch.gameObject;
+            var grabbingObject = interactTouch.scriptAliasObject;
 
             if (!currentGrabbedObject.IsValidInteractableController(grabbingObject, currentGrabbedObject.allowedGrabControllers))
             {
@@ -340,7 +340,7 @@ namespace VRTK
 
         protected virtual void InitSecondaryGrab(VRTK_InteractableObject currentGrabbedObject)
         {
-            var grabbingObject = interactTouch.gameObject;
+            var grabbingObject = interactTouch.scriptAliasObject;
 
             if (!currentGrabbedObject.IsValidInteractableController(grabbingObject, currentGrabbedObject.allowedGrabControllers))
             {
@@ -365,7 +365,7 @@ namespace VRTK
 
         protected virtual void InitUngrabbedObject(bool applyGrabbingObjectVelocity)
         {
-            var grabbingObject = interactTouch.gameObject;
+            var grabbingObject = interactTouch.scriptAliasObject;
 
             if (grabbedObject != null)
             {
@@ -449,7 +449,7 @@ namespace VRTK
 
         protected virtual bool IsValidGrabAttempt(GameObject objectToGrab)
         {
-            var grabbingObject = interactTouch.gameObject;
+            var grabbingObject = interactTouch.scriptAliasObject;
             var initialGrabAttempt = false;
             var objectToGrabScript = objectToGrab.GetComponent<VRTK_InteractableObject>();
             if (grabbedObject == null && interactTouch && IsObjectGrabbable(interactTouch.GetTouchedObject()) && objectToGrabScript && objectToGrabScript.grabAttachMechanicScript.ValidGrab(controllerAttachPoint))
