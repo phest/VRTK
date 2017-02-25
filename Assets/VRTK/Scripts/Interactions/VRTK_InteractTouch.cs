@@ -50,6 +50,10 @@ namespace VRTK
         /// Emitted when a valid object is no longer being touched.
         /// </summary>
         public event ObjectInteractEventHandler ControllerUntouchInteractableObject;
+        /// <summary>
+        /// Emitted when the interact touch script alias object is changed
+        /// </summary>
+        public event ObjectInteractEventHandler ControllerTouchScriptAliasChanged;
 
         protected GameObject touchedObject = null;
         protected List<Collider> touchedObjectColliders = new List<Collider>();
@@ -66,7 +70,7 @@ namespace VRTK
         protected VRTK_ControllerTracker controllerTracker;
         protected GameObject currentScriptAliasObject;
 
-        protected VRTK_ControllerActions controllerActions;
+        public VRTK_ControllerActions controllerActions;
 
         public virtual void OnControllerTouchInteractableObject(ObjectInteractEventArgs e)
         {
@@ -81,6 +85,14 @@ namespace VRTK
             if (ControllerUntouchInteractableObject != null)
             {
                 ControllerUntouchInteractableObject(this, e);
+            }
+        }
+
+        public virtual void OnControllerTouchScriptAliasChanged(ObjectInteractEventArgs e)
+        {
+            if (ControllerTouchScriptAliasChanged != null)
+            {
+                ControllerTouchScriptAliasChanged(this, e);
             }
         }
 
@@ -243,6 +255,7 @@ namespace VRTK
         {
             if (!scriptAliasObject.Equals(currentScriptAliasObject))
             {
+                OnControllerTouchScriptAliasChanged(SetControllerInteractEvent(scriptAliasObject));
                 //if there is alreay a script alias object then unregister the listeners
                 if (currentScriptAliasObject)
                 {

@@ -20,7 +20,6 @@ namespace VRTK
     ///
     /// `VRTK/Examples/008_Controller_UsingAGrabbedObject` shows that objects can be grabbed with one button and used with another (e.g. firing a gun).
     /// </example>
-    [RequireComponent(typeof(VRTK_ControllerEvents))]
     public class VRTK_InteractUse : MonoBehaviour
     {
         [Header("Use Settings")]
@@ -30,6 +29,8 @@ namespace VRTK
 
         [Header("Custom Settings")]
 
+        [Tooltip("The controller to listen for the events on. If this is left blank then the Controller Events script will be required to be on the same GameObject as this script.")]
+        public VRTK_ControllerEvents controllerEvents;
         [Tooltip("The Interact Touch script that is used to determine if an object is valid to use. If this is left blank then the Interact Touch script will be required to be on the same GameObject as this script.")]
         public VRTK_InteractTouch interactTouch;
 
@@ -46,11 +47,10 @@ namespace VRTK
         protected VRTK_ControllerEvents.ButtonAlias savedUseButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
         protected bool usePressed;
         protected VRTK_InteractTouch subscribedInteractTouch;
-
+        protected VRTK_ControllerEvents subscribedControllerEvents;
         protected GameObject usingObject = null;
 
         protected VRTK_ControllerActions controllerActions;
-        protected VRTK_ControllerEvents controllerEvents;
 
         public virtual void OnControllerUseInteractableObject(ObjectInteractEventArgs e)
         {
@@ -102,11 +102,11 @@ namespace VRTK
         protected virtual void Awake()
         {
             controllerActions = GetComponent<VRTK_ControllerActions>();
-            controllerEvents = GetComponent<VRTK_ControllerEvents>();
         }
 
         protected virtual void OnEnable()
         {
+            controllerEvents = (controllerEvents != null ? controllerEvents : GetComponent<VRTK_ControllerEvents>());
             interactTouch = (interactTouch != null ? interactTouch : GetComponent<VRTK_InteractTouch>());
             if (!interactTouch)
             {
@@ -176,17 +176,19 @@ namespace VRTK
 
         protected virtual void ManageUseListener(bool state)
         {
-            if (controllerEvents && subscribedUseButton != VRTK_ControllerEvents.ButtonAlias.Undefined && (!state || !useButton.Equals(subscribedUseButton)))
+            if (subscribedControllerEvents && subscribedUseButton != VRTK_ControllerEvents.ButtonAlias.Undefined && (!state || !useButton.Equals(subscribedUseButton) || !controllerEvents.Equals(subscribedControllerEvents)))
             {
-                controllerEvents.UnsubscribeToButtonAliasEvent(subscribedUseButton, true, DoStartUseObject);
-                controllerEvents.UnsubscribeToButtonAliasEvent(subscribedUseButton, false, DoStopUseObject);
+                subscribedControllerEvents.UnsubscribeToButtonAliasEvent(subscribedUseButton, true, DoStartUseObject);
+                subscribedControllerEvents.UnsubscribeToButtonAliasEvent(subscribedUseButton, false, DoStopUseObject);
                 subscribedUseButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
             }
 
-            if (controllerEvents && state && useButton != VRTK_ControllerEvents.ButtonAlias.Undefined && !useButton.Equals(subscribedUseButton))
+            subscribedControllerEvents = controllerEvents;
+
+            if (subscribedControllerEvents && state && useButton != VRTK_ControllerEvents.ButtonAlias.Undefined && !useButton.Equals(subscribedUseButton))
             {
-                controllerEvents.SubscribeToButtonAliasEvent(useButton, true, DoStartUseObject);
-                controllerEvents.SubscribeToButtonAliasEvent(useButton, false, DoStopUseObject);
+                subscribedControllerEvents.SubscribeToButtonAliasEvent(useButton, true, DoStartUseObject);
+                subscribedControllerEvents.SubscribeToButtonAliasEvent(useButton, false, DoStopUseObject);
                 subscribedUseButton = useButton;
             }
         }

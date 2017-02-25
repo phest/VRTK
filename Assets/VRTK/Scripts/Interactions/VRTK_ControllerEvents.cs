@@ -1275,6 +1275,11 @@ namespace VRTK
                 if (currentScriptAliasObject)
                 {
                     controllerTracker = currentScriptAliasObject.GetComponent<VRTK_ControllerTracker>();
+                    if (controllerTracker == null)
+                    {
+                        Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_ControllerTracker", "VRTK_ControllerEvents", "scriptAliasObject" }));
+                        return;
+                    }
                 }
             }
         }

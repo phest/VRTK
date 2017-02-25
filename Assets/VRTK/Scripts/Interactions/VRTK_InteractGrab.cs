@@ -26,7 +26,6 @@ namespace VRTK
     ///
     /// `VRTK/Examples/014_Controller_SnappingObjectsOnGrab` demonstrates the different mechanisms for snapping a grabbed object to the controller.
     /// </example>
-    [RequireComponent(typeof(VRTK_ControllerEvents))]
     public class VRTK_InteractGrab : MonoBehaviour
     {
         [Header("Grab Settings")]
@@ -42,6 +41,8 @@ namespace VRTK
 
         [Header("Custom Settings")]
 
+        [Tooltip("The controller to listen for the events on. If this is left blank then the Controller Events script will be required to be on the same GameObject as this script.")]
+        public VRTK_ControllerEvents controllerEvents;
         [Tooltip("The Interact Touch script that is used to determine if an object is valid to grab. If this is left blank then the Interact Touch script will be required to be on the same GameObject as this script.")]
         public VRTK_InteractTouch interactTouch;
         [Tooltip("The rigidbody point on the controller model to snap the grabbed object to. If blank it will be set to the SDK default.")]
@@ -60,15 +61,15 @@ namespace VRTK
         protected VRTK_ControllerEvents.ButtonAlias savedGrabButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
         protected bool grabPressed;
         protected VRTK_InteractTouch subscribedInteractTouch;
-
+        protected VRTK_ControllerEvents subscribedControllerEvents;
+        protected bool usingDefaultAttachPoint;
         protected GameObject grabbedObject = null;
         protected bool influencingGrabbedObject = false;
         protected int grabEnabledState = 0;
         protected float grabPrecognitionTimer = 0f;
         protected GameObject undroppableGrabbedObject;
 
-        protected VRTK_ControllerActions controllerActions;
-        protected VRTK_ControllerEvents controllerEvents;
+        public VRTK_ControllerActions controllerActions;
 
         public virtual void OnControllerGrabInteractableObject(ObjectInteractEventArgs e)
         {
@@ -115,17 +116,18 @@ namespace VRTK
         protected virtual void Awake()
         {
             controllerActions = GetComponent<VRTK_ControllerActions>();
-            controllerEvents = GetComponent<VRTK_ControllerEvents>();
         }
 
         protected virtual void OnEnable()
         {
+            controllerEvents = (controllerEvents != null ? controllerEvents : GetComponent<VRTK_ControllerEvents>());
             interactTouch = (interactTouch != null ? interactTouch : GetComponent<VRTK_InteractTouch>());
             if (!interactTouch)
             {
                 Debug.LogError(VRTK_SharedMethods.GetCommonString("REQUIRED_SCRIPT_MISSING_FROM_GAMEOBJECT", new string[] { "VRTK_InteractTouch", "VRTK_InteractGrab", "interactTouch" }));
                 return;
             }
+
             ManageGrabListener(true);
             ManageInteractTouchListener(true);
             RegrabUndroppableObject();
@@ -155,6 +157,7 @@ namespace VRTK
             {
                 subscribedInteractTouch.ControllerTouchInteractableObject -= ControllerTouchInteractableObject;
                 subscribedInteractTouch.ControllerUntouchInteractableObject -= ControllerUntouchInteractableObject;
+                subscribedInteractTouch.ControllerTouchScriptAliasChanged -= ControllerTouchScriptAliasChanged;
                 subscribedInteractTouch = null;
             }
 
@@ -163,6 +166,16 @@ namespace VRTK
                 subscribedInteractTouch = interactTouch;
                 subscribedInteractTouch.ControllerTouchInteractableObject += ControllerTouchInteractableObject;
                 subscribedInteractTouch.ControllerUntouchInteractableObject += ControllerUntouchInteractableObject;
+                subscribedInteractTouch.ControllerTouchScriptAliasChanged += ControllerTouchScriptAliasChanged;
+                controllerAttachPoint = null;
+            }
+        }
+
+        protected virtual void ControllerTouchScriptAliasChanged(object sender, ObjectInteractEventArgs e)
+        {
+            if (usingDefaultAttachPoint)
+            {
+                controllerAttachPoint = null;
             }
         }
 
@@ -194,17 +207,19 @@ namespace VRTK
 
         protected virtual void ManageGrabListener(bool state)
         {
-            if (controllerEvents && subscribedGrabButton != VRTK_ControllerEvents.ButtonAlias.Undefined && (!state || !grabButton.Equals(subscribedGrabButton)))
+            if (subscribedControllerEvents && subscribedGrabButton != VRTK_ControllerEvents.ButtonAlias.Undefined && (!state || !grabButton.Equals(subscribedGrabButton) || !controllerEvents.Equals(subscribedControllerEvents)))
             {
-                controllerEvents.UnsubscribeToButtonAliasEvent(subscribedGrabButton, true, DoGrabObject);
-                controllerEvents.UnsubscribeToButtonAliasEvent(subscribedGrabButton, false, DoReleaseObject);
+                subscribedControllerEvents.UnsubscribeToButtonAliasEvent(subscribedGrabButton, true, DoGrabObject);
+                subscribedControllerEvents.UnsubscribeToButtonAliasEvent(subscribedGrabButton, false, DoReleaseObject);
                 subscribedGrabButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
             }
 
-            if (controllerEvents && state && grabButton != VRTK_ControllerEvents.ButtonAlias.Undefined && !grabButton.Equals(subscribedGrabButton))
+            subscribedControllerEvents = controllerEvents;
+
+            if (subscribedControllerEvents && state && grabButton != VRTK_ControllerEvents.ButtonAlias.Undefined && !grabButton.Equals(subscribedGrabButton))
             {
-                controllerEvents.SubscribeToButtonAliasEvent(grabButton, true, DoGrabObject);
-                controllerEvents.SubscribeToButtonAliasEvent(grabButton, false, DoReleaseObject);
+                subscribedControllerEvents.SubscribeToButtonAliasEvent(grabButton, true, DoGrabObject);
+                subscribedControllerEvents.SubscribeToButtonAliasEvent(grabButton, false, DoReleaseObject);
                 subscribedGrabButton = grabButton;
             }
         }
@@ -256,6 +271,7 @@ namespace VRTK
                         autoGenRB.isKinematic = true;
                         controllerAttachPoint = autoGenRB;
                     }
+                    usingDefaultAttachPoint = true;
                 }
             }
         }
@@ -298,7 +314,7 @@ namespace VRTK
                     controllerAppearanceScript.ToggleControllerOnGrab(visible, controllerActions, grabbedObject);
                 }
             }
-            else if (visible)
+            else if (controllerActions && visible)
             {
                 controllerActions.ToggleControllerModel(true, grabbedObject);
             }
