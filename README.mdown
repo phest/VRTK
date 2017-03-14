@@ -1,0 +1,10 @@
+
+VRTK SDK
+
+Unofficial fork of [VRTK](https://github.com/thestonefox/VRTK) containing only the SDK abstractions: 
+- access to inputs in an SDK agnostic way through `VRTK_SDK_Bridge`
+- ability to switch SDK using `VRTK_SDKManager`.
+
+The aim of this fork is to contain only the code that those functionalities depend on.
+
+For documentation & credits & contributing -> https://github.com/thestonefox/VRTK
